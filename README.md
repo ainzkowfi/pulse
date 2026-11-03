@@ -10,38 +10,38 @@ memory/MEMORY.global.template.md   seed for global user memory
 memory/MEMORY.project.template.md  seed for per-project memory
 ```
 
-## Install (per machine)
+## Install — paste this into opencode
+
+On any machine, open a session and paste (replace `<repo-url>` with the git URL):
+
+> Install the pulse opencode agent from `<repo-url>`:
+> 1. Clone it into `~/pulse` (skip clone if it already exists).
+> 2. `mkdir -p ~/.config/opencode/agents ~/.config/opencode/memory`
+> 3. Symlink `~/pulse/agent/pulse.md` → `~/.config/opencode/agents/pulse.md` (if symlinks aren't supported, e.g. plain Windows, use `cp` instead and re-copy after every pull).
+> 4. Set `default_agent` to `"pulse"` in `~/.config/opencode/opencode.jsonc` (preserve all existing settings in the file).
+> 5. If `~/.config/opencode/memory/MEMORY.md` does not exist, seed it from `~/pulse/memory/MEMORY.global.template.md`. Never overwrite an existing one.
+> 6. Report what was done and what was skipped.
+
+Per project, paste instead/also:
+
+> Set up pulse project memory for this repo:
+> 1. `mkdir -p .pulse/memory` and copy `~/pulse/memory/MEMORY.project.template.md` to `.pulse/memory/MEMORY.md` (skip copy if it already exists — never overwrite).
+> 2. Ensure `.pulse/` is in `.gitignore` (append if missing).
+> 3. Report.
+
+No restart needed — opencode watches config files (`/reload` in the TUI forces it).
+
+## Manual install (fallback)
 
 ```sh
-git clone <this-repo-url> ~/pulse
+git clone <repo-url> ~/pulse
 mkdir -p ~/.config/opencode/agents ~/.config/opencode/memory
 ln -s ~/pulse/agent/pulse.md ~/.config/opencode/agents/pulse.md
+# set "default_agent": "pulse" in ~/.config/opencode/opencode.jsonc (keep other settings)
+cp ~/pulse/memory/MEMORY.global.template.md ~/.config/opencode/memory/MEMORY.md   # first machine only
 ```
 
-Windows without symlink developer mode: use `cp` instead of `ln -s` — but plain `cp` goes stale, so re-copy after every pull, or use developer mode and symlink.
-
-Set `default_agent` in `~/.config/opencode/opencode.jsonc`:
-
-```jsonc
-{ "default_agent": "pulse" }
-```
-
-First machine only — seed the global memory:
-
-```sh
-cp memory/MEMORY.global.template.md ~/.config/opencode/memory/MEMORY.md
-```
-
-Per project:
-
-```sh
-cd <project>
-mkdir -p .pulse/memory
-cp ~/pulse/memory/MEMORY.project.template.md .pulse/memory/MEMORY.md
-grep -qxF '.pulse/' .gitignore || echo '.pulse/' >> .gitignore
-```
-
-Opencode watches config files — no restart needed (or `/reload` in the TUI).
+Per project: `mkdir -p .pulse/memory && cp ~/pulse/memory/MEMORY.project.template.md .pulse/memory/MEMORY.md && echo '.pulse/' >> .gitignore`
 
 ## Memory model
 
@@ -56,4 +56,4 @@ Opencode watches config files — no restart needed (or `/reload` in the TUI).
 cd ~/pulse && git pull
 ```
 
-Symlinked machines are live immediately. Windows/`cp` machines must re-copy.
+Symlinked machines live immediately. Else re-copy `pulse.md` after pull.
