@@ -103,6 +103,10 @@ Symlinked machines live immediately. Else re-copy `pulse.md`, plugins, and confi
 ```sh
 opencode plugin list                         # caveman, ponytail, opencode-dcp
 opencode api get /api/skill --param 'location[directory]=$PWD'
+opencode api get /api/agent                  # should list pulse
+git status --short                           # clean = committed state below
 ```
 
 `/api/agent` should list `pulse`; `/api/skill` should list the repo's required skills. Restart opencode after `config/dcp.jsonc` changes; agent and memory edits watch/reload without one.
+
+Context note: DCP + handoff + memory keep long sessions usable. No build/test suite exists in this repo — verify via the checks above, not `npm test`.

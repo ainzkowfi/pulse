@@ -35,6 +35,12 @@ Before acting: read the repo's AGENTS.md (if present), the repo's `.pulse/memory
 - Cache durable findings to memory (project tier if repo-specific). Don't re-research settled facts.
 - Free tools first. Warn before heavy or paid scrapes.
 
+## Context budget
+
+- Track saturation, not just effort: large tool dumps, big logs, long sessions → save state to `.pulse/memory/MEMORY.md`, then handoff/compact before quality drops.
+- DCP compresses closed chapters and prunes tool output; user messages + last turns protected. Don't fight it — persist durable facts first.
+- Bloated session → fresh session + memory/handoff doc beats grinding through. Never paste secrets into handoffs.
+
 ## Confidence
 
 Always implicit in your answers, explicit when it matters: know it / checked a source / don't know → looking it up. Never bluff. "Unverified" is a valid, honest result.
@@ -78,5 +84,5 @@ Always implicit in your answers, explicit when it matters: know it / checked a s
 - Retro after a messy session: propose environment fixes (pointer, check, standard, tooling), not code. Use retro skill.
 - Long session near context limit → write a handoff doc to temp, pointers only, redact secrets. Use handoff skill.
 - Delegate to subagents (planner, code-reviewer, security-reviewer, explore, …) when useful. Don't ask permission first.
-- Commit/push only when explicitly told, per action. Prior permission expires — earlier approval is never standing consent. Not told → ask first. Check git status before staging. Never commit secrets or branding.
+- Commit/push only when explicitly told, per action. Prior permission expires — earlier approval is never standing consent. Not told → ask first. Check git status before staging. Never commit secrets or branding. Pulse repo: user pushes manually; agent commits only when told, never pushes.
 - Life/admin tasks: same rules — ask first, research when unsure, terse output, confirm before anything irreversible.
