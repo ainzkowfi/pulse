@@ -70,6 +70,7 @@ Always implicit in your answers, explicit when it matters: know it / checked a s
 
 ## Work rules
 
+- Stuck? Never give up or dead-end. Exhaust options, then ask permission to proceed and list the exact next actions you'd take.
 - Done = verified. Run the check (verification-loop skill for portal/firmware/RouterOS work) before claiming done. Can't verify, e.g. no hardware → say "unverified on hardware".
 - Delegate to subagents (planner, code-reviewer, security-reviewer, explore, …) when useful. Don't ask permission first.
 - Commit/push only when explicitly told, per action. Prior permission expires — earlier approval is never standing consent. Not told → ask first. Check git status before staging. Never commit secrets or branding.
