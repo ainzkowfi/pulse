@@ -6,9 +6,14 @@ Personal [opencode](https://opencode.ai) agent. Never assumes — asks first. Re
 
 ```
 agent/pulse.md                  the agent (V2 file agent)
+plugins/caveman.ts              caveman mode plugin (V2 port)
+plugins/ponytail.ts             ponytail mode plugin (V2 port)
 config/dcp.jsonc                dynamic context pruning (DCP plugin) config
+config/caveman.json             caveman defaults (full)
+config/ponytail.json            ponytail defaults (full)
 memory/MEMORY.global.template.md   seed for global user memory
 memory/MEMORY.project.template.md  seed for per-project memory
+AGENTS.md                      repo traps; install stays in this README
 ```
 
 ## Install — paste this into opencode
@@ -17,10 +22,22 @@ On any machine, open a session and paste (replace `<repo-url>` with the git URL)
 
 > Install the pulse opencode agent from `<repo-url>`:
 > 1. Clone it into `~/pulse` (skip clone if it already exists).
-> 2. `mkdir -p ~/.config/opencode/agents ~/.config/opencode/memory`
+> 2. `mkdir -p ~/.config/opencode/{agents,plugins,memory}`
 > 3. Symlink `~/pulse/agent/pulse.md` → `~/.config/opencode/agents/pulse.md` (if symlinks aren't supported, e.g. plain Windows, use `cp` instead and re-copy after every pull).
-> 4. If `~/.config/opencode/dcp.jsonc` exists, back it up to `dcp.jsonc.bak`, then symlink `~/pulse/config/dcp.jsonc` → `~/.config/opencode/dcp.jsonc`.
-> 5. Add the pruning plugin: `opencode plugin add @tarquinen/opencode-dcp@latest`.
+> 4. Install required plugins only where missing; never overwrite an existing file:
+>    - Symlink `~/pulse/plugins/caveman.ts` and `~/pulse/plugins/ponytail.ts` into `~/.config/opencode/plugins/`.
+>    - Symlink `~/pulse/config/caveman.json`, `ponytail.json`, `dcp.jsonc` into `~/.config/opencode/` if absent.
+>    - `opencode plugin add @tarquinen/opencode-dcp@latest` (skip if already in `opencode.json`)
+> 5. Install required skills only if absent from both `~/.config/opencode/skills` and `~/.agents/skills`:
+>    - `npx skills add vercel-labs/skills@find-skills -g -y`
+>    - `npx skills add affaan-m/ecc@verification-loop -g -y`
+>    - `npx skills add vercel-labs/agent-skills@web-design-guidelines -g -y`
+>    - `npx skills add pbakaus/impeccable@impeccable -g -y`
+>    - `npx skills@latest add mattpocock/skills --skill=diagnosing-bugs -g -y`
+>    - `npx skills@latest add mattpocock/skills --skill=writing-for-agents -g -y`
+>    - `npx skills@latest add mattpocock/skills --skill=retro -g -y`
+>    - `npx skills@latest add mattpocock/skills --skill=handoff -g -y`
+>    - These four ship supporting files; install the full skill directories, not only `SKILL.md`.
 > 6. Set `default_agent` to `"pulse"` in `~/.config/opencode/opencode.jsonc` (preserve all existing settings in the file).
 > 7. If `~/.config/opencode/memory/MEMORY.md` does not exist, seed it from `~/pulse/memory/MEMORY.global.template.md`. Never overwrite an existing one.
 > 8. Report what was done and what was skipped.
@@ -38,11 +55,24 @@ No restart for agent/memory changes — opencode watches config files (`/reload`
 
 ```sh
 git clone <repo-url> ~/pulse
-mkdir -p ~/.config/opencode/agents ~/.config/opencode/memory
+mkdir -p ~/.config/opencode/{agents,plugins,memory}
 ln -s ~/pulse/agent/pulse.md ~/.config/opencode/agents/pulse.md
-[ -e ~/.config/opencode/dcp.jsonc ] && mv ~/.config/opencode/dcp.jsonc ~/.config/opencode/dcp.jsonc.bak
-ln -s ~/pulse/config/dcp.jsonc ~/.config/opencode/dcp.jsonc
+# plugins/configs: only if absent
+[ -e ~/.config/opencode/plugins/caveman.ts ] || ln -s ~/pulse/plugins/caveman.ts ~/.config/opencode/plugins/caveman.ts
+[ -e ~/.config/opencode/plugins/ponytail.ts ] || ln -s ~/pulse/plugins/ponytail.ts ~/.config/opencode/plugins/ponytail.ts
+[ -e ~/.config/opencode/caveman.json ] || ln -s ~/pulse/config/caveman.json ~/.config/opencode/caveman.json
+[ -e ~/.config/opencode/ponytail.json ] || ln -s ~/pulse/config/ponytail.json ~/.config/opencode/ponytail.json
+[ -e ~/.config/opencode/dcp.jsonc ] || ln -s ~/pulse/config/dcp.jsonc ~/.config/opencode/dcp.jsonc
 opencode plugin add @tarquinen/opencode-dcp@latest
+# skills: only if absent
+npx skills add vercel-labs/skills@find-skills -g -y
+npx skills add affaan-m/ecc@verification-loop -g -y
+npx skills add vercel-labs/agent-skills@web-design-guidelines -g -y
+npx skills add pbakaus/impeccable@impeccable -g -y
+npx skills@latest add mattpocock/skills --skill=diagnosing-bugs -g -y
+npx skills@latest add mattpocock/skills --skill=writing-for-agents -g -y
+npx skills@latest add mattpocock/skills --skill=retro -g -y
+npx skills@latest add mattpocock/skills --skill=handoff -g -y
 # set "default_agent": "pulse" in ~/.config/opencode/opencode.jsonc (keep other settings)
 cp ~/pulse/memory/MEMORY.global.template.md ~/.config/opencode/memory/MEMORY.md   # first machine only
 ```
@@ -66,4 +96,13 @@ DCP plugin, config in `config/dcp.jsonc`: compress closed chapters, dedupe repea
 cd ~/pulse && git pull
 ```
 
-Symlinked machines live immediately. Else re-copy `pulse.md` after pull.
+Symlinked machines live immediately. Else re-copy `pulse.md`, plugins, and configs after pull. Skills installed via `npx skills ... -g` are copies, not symlinks — re-run the add commands (or `npx skills update -g` where supported) to refresh them.
+
+## Verify
+
+```sh
+opencode plugin list                         # caveman, ponytail, opencode-dcp
+opencode api get /api/skill --param 'location[directory]=$PWD'
+```
+
+`/api/agent` should list `pulse`; `/api/skill` should list the repo's required skills. Restart opencode after `config/dcp.jsonc` changes; agent and memory edits watch/reload without one.
