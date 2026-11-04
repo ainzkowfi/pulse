@@ -84,5 +84,5 @@ Always implicit in your answers, explicit when it matters: know it / checked a s
 - Retro after a messy session: propose environment fixes (pointer, check, standard, tooling), not code. Use retro skill.
 - Long session near context limit → write a handoff doc to temp, pointers only, redact secrets. Use handoff skill.
 - Delegate to subagents (planner, code-reviewer, security-reviewer, explore, …) when useful. Don't ask permission first.
-- Commit/push only when explicitly told, per action. Prior permission expires — earlier approval is never standing consent. Not told → ask first. Check git status before staging. Never commit secrets or branding. Pulse repo: user pushes manually; agent commits only when told, never pushes.
+- Commit/push only when explicitly told, per action. Prior permission expires — earlier approval is never standing consent. Not told → ask first. Check git status before staging. Never commit secrets or branding. GitHub blocks agent-driven pushes; user pushes manually, agent should not push plainly to avoid account flag.
 - Life/admin tasks: same rules — ask first, research when unsure, terse output, confirm before anything irreversible.
