@@ -6,6 +6,7 @@ Personal [opencode](https://opencode.ai) agent. Never assumes — asks first. Re
 
 ```
 agent/pulse.md                  the agent (V2 file agent)
+config/dcp.jsonc                dynamic context pruning (DCP plugin) config
 memory/MEMORY.global.template.md   seed for global user memory
 memory/MEMORY.project.template.md  seed for per-project memory
 ```
@@ -18,9 +19,11 @@ On any machine, open a session and paste (replace `<repo-url>` with the git URL)
 > 1. Clone it into `~/pulse` (skip clone if it already exists).
 > 2. `mkdir -p ~/.config/opencode/agents ~/.config/opencode/memory`
 > 3. Symlink `~/pulse/agent/pulse.md` → `~/.config/opencode/agents/pulse.md` (if symlinks aren't supported, e.g. plain Windows, use `cp` instead and re-copy after every pull).
-> 4. Set `default_agent` to `"pulse"` in `~/.config/opencode/opencode.jsonc` (preserve all existing settings in the file).
-> 5. If `~/.config/opencode/memory/MEMORY.md` does not exist, seed it from `~/pulse/memory/MEMORY.global.template.md`. Never overwrite an existing one.
-> 6. Report what was done and what was skipped.
+> 4. If `~/.config/opencode/dcp.jsonc` exists, back it up to `dcp.jsonc.bak`, then symlink `~/pulse/config/dcp.jsonc` → `~/.config/opencode/dcp.jsonc`.
+> 5. Add the pruning plugin: `opencode plugin add @tarquinen/opencode-dcp@latest`.
+> 6. Set `default_agent` to `"pulse"` in `~/.config/opencode/opencode.jsonc` (preserve all existing settings in the file).
+> 7. If `~/.config/opencode/memory/MEMORY.md` does not exist, seed it from `~/pulse/memory/MEMORY.global.template.md`. Never overwrite an existing one.
+> 8. Report what was done and what was skipped.
 
 Per project, paste instead/also:
 
@@ -29,7 +32,7 @@ Per project, paste instead/also:
 > 2. Ensure `.pulse/` is in `.gitignore` (append if missing).
 > 3. Report.
 
-No restart needed — opencode watches config files (`/reload` in the TUI forces it).
+No restart for agent/memory changes — opencode watches config files (`/reload` in the TUI forces it). Restart opencode after changing `dcp.jsonc`.
 
 ## Manual install (fallback)
 
@@ -37,6 +40,9 @@ No restart needed — opencode watches config files (`/reload` in the TUI forces
 git clone <repo-url> ~/pulse
 mkdir -p ~/.config/opencode/agents ~/.config/opencode/memory
 ln -s ~/pulse/agent/pulse.md ~/.config/opencode/agents/pulse.md
+[ -e ~/.config/opencode/dcp.jsonc ] && mv ~/.config/opencode/dcp.jsonc ~/.config/opencode/dcp.jsonc.bak
+ln -s ~/pulse/config/dcp.jsonc ~/.config/opencode/dcp.jsonc
+opencode plugin add @tarquinen/opencode-dcp@latest
 # set "default_agent": "pulse" in ~/.config/opencode/opencode.jsonc (keep other settings)
 cp ~/pulse/memory/MEMORY.global.template.md ~/.config/opencode/memory/MEMORY.md   # first machine only
 ```
@@ -49,6 +55,10 @@ Per project: `mkdir -p .pulse/memory && cp ~/pulse/memory/MEMORY.project.templat
 - **Project** (`<project>/.pulse/memory/MEMORY.md`) — project-only: architecture, traps, current state. Local-only, gitignored.
 - Project AGENTS.md stays the shared, committable source of truth. `.pulse/memory/` is private scratch — never duplicates it.
 - Caps ~100 lines, stale entries pruned, duplicates merged. Never secrets.
+
+## Context pruning
+
+DCP plugin, config in `config/dcp.jsonc`: compress closed chapters, dedupe repeated tool output, purge errored tool inputs after 4 turns. Last 4 turns and user messages protected; thresholds 35%/70% of model window; subagents pruned too. Restart opencode after config changes.
 
 ## Updating
 
