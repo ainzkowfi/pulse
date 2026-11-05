@@ -35,5 +35,18 @@ for (const name of fs.readdirSync(path.join(root, 'config'))) {
 console.log('check ok');
 NODE
 
-npm pack --dry-run >/dev/null
+PACK_JSON="$(npm pack --dry-run --json)" PACK_ROOT="$ROOT" node <<'NODE'
+const fs = require('fs');
+const path = require('path');
+const out = JSON.parse(process.env.PACK_JSON);
+const files = (Array.isArray(out) ? out[0] : out).files.map((f) => f.path);
+const pkg = JSON.parse(fs.readFileSync(path.join(process.env.PACK_ROOT, 'package.json'), 'utf8'));
+for (const f of pkg.files) {
+  const p = f.endsWith('/') ? f.slice(0, -1) : f;
+  const ok = f.endsWith('/') ? files.some((x) => x === p || x.startsWith(`${p}/`)) : files.includes(f);
+  if (!ok) throw new Error(`npm pack missing ${f}`);
+}
+console.log('npm pack file list ok');
+NODE
+
 node --experimental-strip-types scripts/check-plugins.mjs

@@ -4,6 +4,9 @@
   "description": "Personal OpenCode agent — resolves material ambiguity, researches when unsure, terse senior-dev output",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=22.6"
+  },
   "files": [
     "agent/pulse.md",
     "agent/reviewer.md",
