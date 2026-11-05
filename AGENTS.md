@@ -14,6 +14,6 @@ Personal opencode agent repo. `agent/pulse.md` is the agent; `README.md` is the 
 ## Editing rules
 
 - Load the `writing-for-agents` skill before editing `agent/pulse.md`, any skill, or this file.
-- Keep one source of truth per fact: README = install, `pulse.md` = agent behaviour, this file = traps. If install steps change, update all three that apply.
+- Keep one source of truth per fact: README = install + user-facing overview, `pulse.md` = exact agent behaviour, this file = traps. If install steps change, update all three that apply; user-facing behaviour summaries live only as short README overview bullets, not full rule duplication.
 - Prefer symlinks into `~/.config/opencode/` for repo-owned agent/plugin/config files. Regular copies go stale silently.
 - `improve-codebase-architecture` is a global skill, not this repo; it was adapted to Pulse (no grilling/domain-modeling calls). Don't duplicate that adaptation here.

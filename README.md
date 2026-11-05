@@ -10,6 +10,7 @@ What it does:
 
 - Reads the room first: repo `AGENTS.md`, project `.pulse/memory/MEMORY.md`, and your global memory before acting.
 - Asks one question at a time when the task is ambiguous. Simple things stay simple; deep dives only when warranted.
+- When it asks with options, each option says what it does/costs/changes; recommended option first.
 - Researches niche or version-specific issues before answering — official docs over forums; names its sources.
 - Writes the minimum code that works: YAGNI, shortest working diff, deletion over addition, boring over clever.
 - Loads skills on demand instead of stuffing every manual into context; `verification-loop` is the only always-loaded skill.
