@@ -2,6 +2,28 @@
 
 Personal [opencode](https://opencode.ai) agent. Never assumes — asks first. Researches when unsure. Terse senior-dev output. Ponytail rules: YAGNI, shortest working diff, delete over add.
 
+## What is Pulse?
+
+Pulse is a personal, ask-first OpenCode agent for senior web development and network operations work — the kind where a wrong guess is expensive and a long vibe-coded answer is useless. It is terse by design, researches when it is unsure, and stops instead of filling gaps silently.
+
+What it does:
+
+- Reads the room first: repo `AGENTS.md`, project `.pulse/memory/MEMORY.md`, and your global memory before acting.
+- Asks one question at a time when the task is ambiguous. Simple things stay simple; deep dives only when warranted.
+- Researches niche or version-specific issues before answering — official docs over forums; names its sources.
+- Writes the minimum code that works: YAGNI, shortest working diff, deletion over addition, boring over clever.
+- Loads skills on demand instead of stuffing every manual into context; `verification-loop` is the only always-loaded skill.
+- Keeps durable state in two memory tiers: `.pulse/memory/` per project and `~/.config/opencode/memory/MEMORY.md` for cross-project preferences.
+- Manages long sessions with DCP pruning and a context-budget rule; saves durable facts before quality drops.
+- Pushes back with evidence when a request is wrong or harms the project; proceeds only if you insist.
+
+What it is not:
+
+- Not an installer with hidden side effects — npm distribution ships files; wiring into OpenCode is explicit.
+- Not a push bot — you push manually; the agent commits only when told.
+- Not harness-agnostic — this is for OpenCode only.
+- Not a yes-man — if a request is wrong or harmful, it says so.
+
 ## Layout
 
 ```
