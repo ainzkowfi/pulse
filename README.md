@@ -14,6 +14,7 @@ config/ponytail.json            ponytail defaults (full)
 memory/MEMORY.global.template.md   seed for global user memory
 memory/MEMORY.project.template.md  seed for per-project memory
 AGENTS.md                      repo traps; install stays in this README
+package.json                   npm distribution (`pulse-opencode-agent`); no install scripts
 ```
 
 ## Install — paste this into opencode
@@ -79,6 +80,28 @@ cp ~/pulse/memory/MEMORY.global.template.md ~/.config/opencode/memory/MEMORY.md 
 
 Per project: `mkdir -p .pulse/memory && cp ~/pulse/memory/MEMORY.project.template.md .pulse/memory/MEMORY.md && echo '.pulse/' >> .gitignore`
 
+## Install from npm
+
+`pulse-opencode-agent` is a public npm snapshot of this repo. It does **not** run an installer; after installing, wire the files into opencode the same way, using `$PULSE_ROOT` instead of `~/pulse`:
+
+```sh
+npm install -g pulse-opencode-agent
+PULSE_ROOT="$(npm root -g)/pulse-opencode-agent"
+mkdir -p ~/.config/opencode/{agents,plugins,memory}
+ln -s "$PULSE_ROOT/agent/pulse.md" ~/.config/opencode/agents/pulse.md
+# plugins/configs: only if absent
+[ -e ~/.config/opencode/plugins/caveman.ts ] || ln -s "$PULSE_ROOT/plugins/caveman.ts" ~/.config/opencode/plugins/caveman.ts
+[ -e ~/.config/opencode/plugins/ponytail.ts ] || ln -s "$PULSE_ROOT/plugins/ponytail.ts" ~/.config/opencode/plugins/ponytail.ts
+[ -e ~/.config/opencode/caveman.json ] || ln -s "$PULSE_ROOT/config/caveman.json" ~/.config/opencode/caveman.json
+[ -e ~/.config/opencode/ponytail.json ] || ln -s "$PULSE_ROOT/config/ponytail.json" ~/.config/opencode/ponytail.json
+[ -e ~/.config/opencode/dcp.jsonc ] || ln -s "$PULSE_ROOT/config/dcp.jsonc" ~/.config/opencode/dcp.jsonc
+opencode plugin add @tarquinen/opencode-dcp@latest
+# set "default_agent": "pulse" in ~/.config/opencode/opencode.jsonc (keep other settings)
+cp "$PULSE_ROOT/memory/MEMORY.global.template.md" ~/.config/opencode/memory/MEMORY.md   # first machine only
+```
+
+Install the required skills from the Manual install section. Update later with `npm update -g pulse-opencode-agent`; existing symlinks keep resolving to the same paths. If you want `git pull` semantics instead, use the git install above.
+
 ## Memory model
 
 - **Global** (`~/.config/opencode/memory/MEMORY.md`) — about the user, learned across projects. Preferences, style, decisions that hold everywhere.
@@ -93,7 +116,9 @@ DCP plugin, config in `config/dcp.jsonc`: compress closed chapters, dedupe repea
 ## Updating
 
 ```sh
-cd ~/pulse && git pull
+cd ~/pulse && git pull          # git install
+# or
+npm update -g pulse-opencode-agent   # npm install
 ```
 
 Symlinked machines live immediately. Else re-copy `pulse.md`, plugins, and configs after pull. Skills installed via `npx skills ... -g` are copies, not symlinks — re-run the add commands (or `npx skills update -g` where supported) to refresh them.
