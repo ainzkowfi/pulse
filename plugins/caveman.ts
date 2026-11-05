@@ -6,7 +6,7 @@
 // This local plugin keeps the same behaviour and the same instruction texts, but
 // registers itself through the V2 plugin context.
 
-import { appendFileSync, existsSync, readFileSync } from "fs"
+import { existsSync, readFileSync } from "fs"
 import { homedir } from "os"
 import { join } from "path"
 
@@ -45,7 +45,13 @@ function loadConfig(directory) {
 
 const stateMap = new Map()
 const getMode = (sessionID) => stateMap.get(sessionID)
-const setMode = (sessionID, mode) => stateMap.set(sessionID, mode)
+const setMode = (sessionID, mode) => {
+  if (stateMap.size >= 200 && !stateMap.has(sessionID)) {
+    const oldest = stateMap.keys().next().value
+    if (oldest !== undefined) stateMap.delete(oldest)
+  }
+  stateMap.set(sessionID, mode)
+}
 const effectiveMode = (sessionID, cfg) => getMode(sessionID) ?? cfg.defaultMode
 
 // --- instruction texts, ported verbatim from the 0.1.5 bundle ---

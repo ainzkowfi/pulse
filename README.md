@@ -9,6 +9,7 @@ Pulse is a personal, model-agnostic OpenCode agent for senior web development an
 What it does:
 
 - Reads the room first: repo `AGENTS.md`, project `.pulse/memory/MEMORY.md`, and your global memory before acting.
+- Carries RouterOS/network-op safety defaults: export/backup before changes, rollback or safe mode, never strand management access.
 - Resolves material ambiguity before acting; low-risk, obvious tasks proceed directly. Deep dives only when warranted.
 - When it asks with options, each option says what it does/costs/changes; recommended option first.
 - Researches niche or version-specific issues before answering — official docs over forums; cites its sources.
@@ -31,6 +32,8 @@ What it is not:
 
 ```
 agent/pulse.md                  the agent (V2 file agent)
+agent/reviewer.md               hidden read-only reviewer subagent
+skills/routeros-network-ops/    RouterOS/hotspot/ESP safety skill (bundled)
 plugins/caveman.ts              caveman mode plugin (V2 port)
 plugins/ponytail.ts             ponytail mode plugin (V2 port)
 config/dcp.jsonc                dynamic context pruning (DCP plugin) config
@@ -49,12 +52,13 @@ On any machine, open a session and paste (replace `<repo-url>` with the git URL)
 > Install the pulse opencode agent from `<repo-url>`:
 > 1. Clone it into `~/pulse` (skip clone if it already exists).
 > 2. `mkdir -p ~/.config/opencode/{agents,plugins,memory}`
-> 3. Symlink `~/pulse/agent/pulse.md` → `~/.config/opencode/agents/pulse.md` (if symlinks aren't supported, e.g. plain Windows, use `cp` instead and re-copy after every pull).
-> 4. Install required plugins only where missing; never overwrite an existing file:
+> 3. Symlink `~/pulse/agent/pulse.md` → `~/.config/opencode/agents/pulse.md` and `~/pulse/agent/reviewer.md` → `~/.config/opencode/agents/reviewer.md` (if symlinks aren't supported, e.g. plain Windows, use `cp` instead and re-copy after every pull).
+> 4. Install the bundled skill only if absent: `mkdir -p ~/.config/opencode/skills && ln -s ~/pulse/skills/routeros-network-ops ~/.config/opencode/skills/routeros-network-ops`.
+> 5. Install required plugins only where missing; never overwrite an existing file:
 >    - Symlink `~/pulse/plugins/caveman.ts` and `~/pulse/plugins/ponytail.ts` into `~/.config/opencode/plugins/`.
 >    - Symlink `~/pulse/config/caveman.json`, `ponytail.json`, `dcp.jsonc` into `~/.config/opencode/` if absent.
 >    - `opencode plugin add @tarquinen/opencode-dcp@latest` (skip if already in `opencode.json`)
-> 5. Install required skills only if absent from both `~/.config/opencode/skills` and `~/.agents/skills`:
+> 6. Install required skills only if absent from both `~/.config/opencode/skills` and `~/.agents/skills`:
 >    - `npx skills add vercel-labs/skills@find-skills -g -y`
 >    - `npx skills add affaan-m/ecc@verification-loop -g -y`
 >    - `npx skills add vercel-labs/agent-skills@web-design-guidelines -g -y`
@@ -64,9 +68,9 @@ On any machine, open a session and paste (replace `<repo-url>` with the git URL)
 >    - `npx skills@latest add mattpocock/skills --skill=retro -g -y`
 >    - `npx skills@latest add mattpocock/skills --skill=handoff -g -y`
 >    - These four ship supporting files; install the full skill directories, not only `SKILL.md`.
-> 6. Set `default_agent` to `"pulse"` in `~/.config/opencode/opencode.jsonc` (preserve all existing settings in the file).
-> 7. If `~/.config/opencode/memory/MEMORY.md` does not exist, seed it from `~/pulse/memory/MEMORY.global.template.md`. Never overwrite an existing one.
-> 8. Report what was done and what was skipped.
+> 7. Set `default_agent` to `"pulse"` in `~/.config/opencode/opencode.jsonc` (preserve all existing settings in the file).
+> 8. If `~/.config/opencode/memory/MEMORY.md` does not exist, seed it from `~/pulse/memory/MEMORY.global.template.md`. Never overwrite an existing one.
+> 9. Report what was done and what was skipped.
 
 Per project, paste instead/also:
 
@@ -81,8 +85,10 @@ No restart for agent/memory changes — opencode watches config files (`/reload`
 
 ```sh
 git clone <repo-url> ~/pulse
-mkdir -p ~/.config/opencode/{agents,plugins,memory}
+mkdir -p ~/.config/opencode/{agents,plugins,memory,skills}
 ln -s ~/pulse/agent/pulse.md ~/.config/opencode/agents/pulse.md
+ln -s ~/pulse/agent/reviewer.md ~/.config/opencode/agents/reviewer.md
+[ -e ~/.config/opencode/skills/routeros-network-ops ] || ln -s ~/pulse/skills/routeros-network-ops ~/.config/opencode/skills/routeros-network-ops
 # plugins/configs: only if absent
 [ -e ~/.config/opencode/plugins/caveman.ts ] || ln -s ~/pulse/plugins/caveman.ts ~/.config/opencode/plugins/caveman.ts
 [ -e ~/.config/opencode/plugins/ponytail.ts ] || ln -s ~/pulse/plugins/ponytail.ts ~/.config/opencode/plugins/ponytail.ts
@@ -112,8 +118,10 @@ Per project: `mkdir -p .pulse/memory && cp ~/pulse/memory/MEMORY.project.templat
 ```sh
 npm install -g pulse-opencode-agent
 PULSE_ROOT="$(npm root -g)/pulse-opencode-agent"
-mkdir -p ~/.config/opencode/{agents,plugins,memory}
+mkdir -p ~/.config/opencode/{agents,plugins,memory,skills}
 ln -s "$PULSE_ROOT/agent/pulse.md" ~/.config/opencode/agents/pulse.md
+ln -s "$PULSE_ROOT/agent/reviewer.md" ~/.config/opencode/agents/reviewer.md
+[ -e ~/.config/opencode/skills/routeros-network-ops ] || ln -s "$PULSE_ROOT/skills/routeros-network-ops" ~/.config/opencode/skills/routeros-network-ops
 # plugins/configs: only if absent
 [ -e ~/.config/opencode/plugins/caveman.ts ] || ln -s "$PULSE_ROOT/plugins/caveman.ts" ~/.config/opencode/plugins/caveman.ts
 [ -e ~/.config/opencode/plugins/ponytail.ts ] || ln -s "$PULSE_ROOT/plugins/ponytail.ts" ~/.config/opencode/plugins/ponytail.ts
@@ -136,7 +144,7 @@ Install the required skills from the Manual install section. Update later with `
 
 ## Context pruning
 
-DCP plugin, config in `config/dcp.jsonc`: compress closed chapters, dedupe repeated tool output, purge errored tool inputs after 4 turns. Last 4 turns and user messages protected; thresholds 35%/70% of model window; subagents pruned too. Restart opencode after config changes.
+DCP plugin, config in `config/dcp.jsonc`: protects the last 4 turns and user messages; subagents may be pruned; compression thresholds 35%/70% of model window. This repo does not tune DCP dedupe/purge behavior. Restart opencode after config changes.
 
 ## Updating
 
@@ -146,7 +154,7 @@ cd ~/pulse && git pull          # git install
 npm update -g pulse-opencode-agent   # npm install
 ```
 
-Symlinked machines live immediately. Else re-copy `pulse.md`, plugins, and configs after pull. Skills installed via `npx skills ... -g` are copies, not symlinks — re-run the add commands (or `npx skills update -g` where supported) to refresh them.
+Symlinked machines live immediately. Else re-copy `pulse.md`, `reviewer.md`, plugins, configs, and the bundled skill after pull. Skills installed via `npx skills ... -g` are copies, not symlinks — re-run the add commands (or `npx skills update -g` where supported) to refresh them.
 
 ## Verify
 

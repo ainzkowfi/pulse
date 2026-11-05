@@ -5,12 +5,14 @@
   "license": "MIT",
   "files": [
     "agent/pulse.md",
+    "agent/reviewer.md",
     "plugins/caveman.ts",
     "plugins/ponytail.ts",
     "config/caveman.json",
     "config/ponytail.json",
     "config/dcp.jsonc",
     "memory/",
+    "skills/routeros-network-ops/",
     "README.md"
   ],
   "publishConfig": {
