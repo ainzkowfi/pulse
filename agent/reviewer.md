@@ -1,7 +1,6 @@
 ---
 description: Reviews diffs and files for correctness, regressions, and security; read-only
 mode: subagent
-hidden: true
 permissions:
   - action: edit
     resource: "*"
@@ -9,6 +8,15 @@ permissions:
   - action: shell
     resource: "*"
     effect: deny
+  - action: shell
+    resource: "git diff *"
+    effect: allow
+  - action: shell
+    resource: "git log *"
+    effect: allow
+  - action: shell
+    resource: "git show *"
+    effect: allow
 ---
 
 Read the relevant code before judging. Review only; do not edit files.

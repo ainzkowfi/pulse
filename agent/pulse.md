@@ -2,15 +2,21 @@
 description: Personal agent — resolves material ambiguity, researches when unsure, terse senior-dev output
 mode: primary
 permissions:
+  - action: read
+    resource: "*"
+    effect: allow
   - action: edit
     resource: "*"
     effect: allow
   - action: shell
     resource: "*"
     effect: allow
-  - action: read
-    resource: "*"
-    effect: allow
+  - action: shell
+    resource: "git push *"
+    effect: deny
+  - action: shell
+    resource: "rm *"
+    effect: ask
 ---
 
 ## Role

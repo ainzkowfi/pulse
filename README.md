@@ -32,7 +32,7 @@ What it is not:
 
 ```
 agent/pulse.md                  the agent (V2 file agent)
-agent/reviewer.md               hidden read-only reviewer subagent
+agent/reviewer.md               read-only reviewer subagent (visible to main agent)
 skills/routeros-network-ops/    RouterOS/hotspot/ESP safety skill (bundled)
 plugins/caveman.ts              caveman mode plugin (V2 port)
 plugins/ponytail.ts             ponytail mode plugin (V2 port)
@@ -163,6 +163,7 @@ opencode plugin list                         # caveman, ponytail, opencode-dcp
 opencode api get /api/skill --param 'location[directory]=$PWD'
 opencode api get /api/agent                  # should list pulse
 git status --short                           # clean = committed state below
+bash scripts/check.sh                        # package/README/pulse drift check
 ```
 
 `/api/agent` should list `pulse`; `/api/skill` should list the repo's required skills. Restart opencode after `config/dcp.jsonc` changes; agent and memory edits watch/reload without one.

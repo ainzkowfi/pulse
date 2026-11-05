@@ -9,9 +9,9 @@ Leading rule: never strand management access.
 
 ## Before touching a live RouterOS device
 
-- Export/backup first (`/export file=...` or the documented equivalent). Note versions, interfaces in use, and current default route/DNS.
-- Confirm you have a second path back: another interface, serial/console, or a scheduled rollback window.
-- Use safe mode or a rollback scheduler for firewall/NAT/management changes. Verify you can still reach the device before closing the session.
+- Export and backup first (`/export file=...` for diffs/restore-by-readable-config, `/system backup save` for secret-bearing restore). Note versions, interfaces in use, and current default route/DNS.
+- Confirm you have a second path back: another interface, serial/console, or a recorded backup you can restore.
+- For firewall/NAT/management changes, schedule the rollback before the change: a temp scheduler that restores the pre-change backup/config after N minutes, cancelled only after you verify access. Use safe mode where it fits your session.
 - Change one variable at a time. Re-export after each accepted change.
 
 ## Firewall / NAT / management access
