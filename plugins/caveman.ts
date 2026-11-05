@@ -44,12 +44,9 @@ function loadConfig(directory) {
 }
 
 const stateMap = new Map()
-const getMode = (sessionID) => stateMap.get(sessionID) ?? "off"
+const getMode = (sessionID) => stateMap.get(sessionID)
 const setMode = (sessionID, mode) => stateMap.set(sessionID, mode)
-const effectiveMode = (sessionID, cfg) => {
-  const mode = getMode(sessionID)
-  return mode === "off" ? cfg.defaultMode : mode
-}
+const effectiveMode = (sessionID, cfg) => getMode(sessionID) ?? cfg.defaultMode
 
 // --- instruction texts, ported verbatim from the 0.1.5 bundle ---
 
@@ -197,11 +194,12 @@ export default {
       const sessionID = event?.sessionID
       if (!sessionID || !Array.isArray(event.system)) return
       let mode = getMode(sessionID)
-      if (mode === "off" || !mode) {
+      if (mode === undefined) {
         mode = cfg.defaultMode
         if (mode === "off") return
         setMode(sessionID, mode)
       }
+      if (mode === "off") return
       event.system.push({ type: "text", text: getCavemanSystemInstruction(mode) })
     }
 

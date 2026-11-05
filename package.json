@@ -1,7 +1,7 @@
 {
   "name": "pulse-opencode-agent",
   "version": "0.1.0",
-  "description": "Pulse opencode agent — never assumes, asks first, researches when unsure, terse senior-dev output",
+  "description": "Personal OpenCode agent — resolves material ambiguity, researches when unsure, terse senior-dev output",
   "license": "MIT",
   "files": [
     "agent/pulse.md",
@@ -10,6 +10,7 @@
     "config/caveman.json",
     "config/ponytail.json",
     "config/dcp.jsonc",
+    "memory/",
     "README.md"
   ],
   "publishConfig": {
