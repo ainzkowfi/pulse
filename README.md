@@ -82,7 +82,7 @@ Per project: `mkdir -p .pulse/memory && cp ~/pulse/memory/MEMORY.project.templat
 
 ## Install from npm
 
-`pulse-opencode-agent` is a public npm snapshot of this repo. It does **not** run an installer; after installing, wire the files into opencode the same way, using `$PULSE_ROOT` instead of `~/pulse`:
+`pulse-opencode-agent` is a public npm snapshot of this repo for OpenCode only. It does **not** run an installer; after installing, wire the files into opencode the same way, using `$PULSE_ROOT` instead of `~/pulse`:
 
 ```sh
 npm install -g pulse-opencode-agent
