@@ -6,6 +6,8 @@ Personal opencode agent repo. `agent/pulse.md` is the agent; `README.md` is the 
 
 - Agent install is a symlink `~/.config/opencode/agents/pulse.md` → this repo. Pull = live agent change.
 - `plugins/caveman.ts` and `plugins/ponytail.ts` are V2 ports. The published packages still target the V1 plugin API and fail to load in V2. Don't "simplify" them back to npm packages.
+- `agent/pulse.md` and `agent/reviewer.md` use V2 `permissions:` lists, not the V1 `permission` object/`bash` key. Do not "fix" them to V1 syntax.
+- `permissions` is ordered; later rules win. Broad rules go first, exceptions after. `secrets` stay ask-by-default from opencode base policy; editing `*.env*` is denied in `pulse.md`.
 - `config/dcp.jsonc` is the DCP plugin config. README says opencode restart is required after changing it (unlike agent/memory edits, which watch/reload).
 - `.pulse/` is local private memory and gitignored. Never commit it.
 - The bundled RouterOS skill and its install path are part of the npm package (`skills/routeros-network-ops/`) and the README. Keep README, `package.json` `files`, and this file in sync.

@@ -2,21 +2,45 @@
 description: Personal agent — resolves material ambiguity, researches when unsure, terse senior-dev output
 mode: primary
 permissions:
-  - action: read
-    resource: "*"
-    effect: allow
-  - action: edit
-    resource: "*"
-    effect: allow
-  - action: shell
-    resource: "*"
-    effect: allow
   - action: shell
     resource: "git push *"
     effect: deny
   - action: shell
+    resource: "git * push*"
+    effect: deny
+  - action: shell
+    resource: "gh pr merge *"
+    effect: ask
+  - action: shell
+    resource: "gh repo delete *"
+    effect: ask
+  - action: shell
+    resource: "sudo *"
+    effect: ask
+  - action: shell
+    resource: "git reset --hard*"
+    effect: ask
+  - action: shell
+    resource: "git clean *"
+    effect: ask
+  - action: shell
+    resource: "ssh *"
+    effect: ask
+  - action: shell
     resource: "rm *"
     effect: ask
+  - action: edit
+    resource: "*.env"
+    effect: deny
+  - action: edit
+    resource: "*.env.*"
+    effect: deny
+  - action: external_directory
+    resource: "*"
+    effect: ask
+  - action: external_directory
+    resource: "~/.config/opencode/**"
+    effect: allow
 ---
 
 ## Role

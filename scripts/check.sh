@@ -9,16 +9,15 @@ const root = process.env.ROOT;
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
 const pulse = fs.readFileSync(path.join(root, 'agent/pulse.md'), 'utf8');
+const covered = (r) => pkg.files.some(f => f === r || (f.endsWith('/') && r.startsWith(f)));
 
 for (const f of pkg.files) {
   const full = path.join(root, f);
   if (!fs.existsSync(full)) throw new Error(`package files missing: ${f}`);
 }
 
-for (const required of ['agent/pulse.md', 'agent/reviewer.md', 'skills/routeros-network-ops/SKILL.md', 'memory/MEMORY.global.template.md']) {
-  if (!pkg.files.includes(required) && !pkg.files.includes('memory/')) {
-    throw new Error(`package.json files missing ${required}`);
-  }
+for (const r of ['agent/pulse.md', 'agent/reviewer.md', 'skills/routeros-network-ops/SKILL.md', 'memory/MEMORY.global.template.md']) {
+  if (!covered(r)) throw new Error(`package.json files missing ${r}`);
 }
 
 for (const ref of ['agent/reviewer.md', 'skills/routeros-network-ops', 'memory/MEMORY.global.template.md']) {
@@ -29,5 +28,12 @@ for (const skill of ['coding-standards', 'tdd-workflow', 'api-design', 'backend/
   if (!pulse.includes(skill)) throw new Error(`pulse.md skill branch missing ${skill}`);
 }
 
+for (const name of fs.readdirSync(path.join(root, 'config'))) {
+  if (name.endsWith('.json')) JSON.parse(fs.readFileSync(path.join(root, 'config', name), 'utf8'));
+}
+
 console.log('check ok');
 NODE
+
+npm pack --dry-run >/dev/null
+node --experimental-strip-types scripts/check-plugins.mjs
