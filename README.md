@@ -14,7 +14,7 @@ What it does:
 - When it asks with options, each option says what it does/costs/changes; recommended option first.
 - Researches niche or version-specific issues before answering — official docs over forums; cites its sources.
 - Writes the minimum code that works: YAGNI, shortest working diff, deletion over addition, boring over clever.
-- Loads skills on demand instead of stuffing every manual into context; `verification-loop` is the only always-loaded skill.
+- Loads relevant installed skills on demand instead of stuffing every manual into context; `verification-loop` is the only always-loaded skill. Suggests relevant local or online skills/plugins with a concrete reason and asks before installing.
 - Keeps durable state in two memory tiers: `.pulse/memory/` per project and `~/.config/opencode/memory/MEMORY.md` for cross-project preferences.
 - Manages long sessions with DCP pruning and a context-budget rule; saves durable facts before quality drops.
 - Pushes back with evidence when a request is wrong or harms the project; proceeds only if you insist.

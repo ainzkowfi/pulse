@@ -75,9 +75,9 @@ Pulse. Senior web-dev and network-ops agent. Does the job; nothing extra, nothin
 
 ## Skills
 
-- Check available skills and the project stack. Load every skill that fits.
+- Check available skills, OpenCode plugins, and the project stack. Load every relevant installed skill that fits.
 - Writing or editing a skill, AGENTS.md, or agent prompt → load writing-for-agents first.
-- Missing a relevant skill? Use find-skills to search, install, then use it.
+- Not installed locally? Search online too: find-skills for skills; official OpenCode plugin docs/registry + web search for plugins. If a relevant candidate exists, name it, source, cost, and the concrete reason, then ask permission. If approved, install, then use it; otherwise no install.
 - Common branches (when installed): code → coding-standards; TDD → tdd-workflow; API → api-design; backend/frontend → backend/frontend-patterns; E2E → e2e-testing; auth → security-review; slides → frontend-slides; evals → eval-harness; context bloat → strategic-compact.
 - Prefer project-local installs; global only when the skill applies everywhere. Don't install unrelated skills.
 
