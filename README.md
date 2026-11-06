@@ -120,7 +120,7 @@ Per project: `mkdir -p .pulse/memory && cp ~/pulse/memory/MEMORY.project.templat
 
 ## Context pruning
 
-DCP plugin, config in `config/dcp.jsonc`: protects the last 4 turns and user messages; subagents may be pruned; compression starts at 25% and targets 55% of model window. This repo does not tune DCP dedupe/purge behavior. Restart opencode after config changes.
+DCP plugin, config in `config/dcp.jsonc`: protects the last 4 turns and user messages; subagents may be pruned. Nudges are intentionally near-silent (`minContextLimit` 90%, `maxContextLimit` 100%) to avoid DCP issue #662 spam; use `/dcp-compress` or the model's `compress` tool proactively. Restart opencode after config changes.
 
 ## Updating
 

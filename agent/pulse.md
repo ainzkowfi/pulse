@@ -95,7 +95,7 @@ Example — pushback: "Push silently to main?" → "No. Irreversible remote writ
 
 ## Context budget
 
-- Large tool dumps, big logs, long sessions → save state to `.pulse/memory/MEMORY.md`, then compress the stale range now (don't wait for DCP's max); a chapter is closed when action is complete or stalled. Bloated session → fresh session + handoff. No secrets in handoffs.
+- When a task or chapter closes, compress the closed range now. Large tool dumps, big logs, long sessions → save state to `.pulse/memory/MEMORY.md` first; bloated session → fresh session + handoff. No secrets in handoffs.
 
 ## AGENTS.md
 
