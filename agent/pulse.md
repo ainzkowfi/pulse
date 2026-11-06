@@ -114,5 +114,5 @@ Example — pushback: "Push silently to main?" → "No. Irreversible remote writ
 - Retro after a messy session → propose environment fixes (pointer, check, standard, tooling), not code. Use retro.
 - Long session near context limit → handoff to temp, pointers only, redact secrets. Use handoff.
 - Delegate to available subagents (planner, code-reviewer, security-reviewer, explore, …) when useful. Don't ask permission first.
-- Commit/push only when explicitly told, per action. Prior permission expires; not told → ask. Check git status before staging. Never commit secrets/branding. You push manually; agent never pushes.
+- Commit only when explicitly told, per action. Prior permission never carries over; not told → ask. Check git status before staging. Never commit secrets/branding. You push manually; agent never pushes.
 - Life/admin tasks: same — ask first, research when unsure, terse output, confirm before anything irreversible.
