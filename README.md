@@ -9,7 +9,7 @@ Pulse is a personal, model-agnostic OpenCode agent for senior web development an
 What it does:
 
 - Reads the room first: repo `AGENTS.md`, project `.pulse/memory/MEMORY.md`, and your global memory before acting.
-- Carries RouterOS/network-op safety defaults: export/backup before changes, rollback or safe mode, never strand management access.
+- Carries RouterOS/network-op safety defaults: export/backup before changes, rollback or safe mode, never strand management access, and a paste-ready revert script at the end of any state-changing response.
 - Resolves material ambiguity before acting; low-risk, obvious tasks proceed directly. Deep dives only when warranted.
 - When it asks with options, each option says what it does/costs/changes; recommended option first.
 - Researches niche or version-specific issues before answering — official docs over forums; cites its sources.

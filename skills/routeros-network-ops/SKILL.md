@@ -11,6 +11,7 @@ Leading rule: never strand management access.
 
 - Export and backup first (`/export file=...` for diffs/restore-by-readable-config, `/system backup save` for secret-bearing restore). Note versions, interfaces in use, and current default route/DNS.
 - Confirm you have a second path back: another interface, serial/console, or a recorded backup you can restore.
+- End every response that makes/applies a live RouterOS change with a paste-ready revert script: the exact commands (or the exact restore command for the recorded backup) to undo what the response just changed. If a change cannot be represented as a script, say why and give the safest equivalent (backup restore, reset, reflash). Never emit an apply-script without the revert block.
 - For firewall/NAT/management changes, schedule the rollback before the change: a temp scheduler that restores the pre-change backup/config after N minutes, cancelled only after you verify access. Use safe mode where it fits your session.
 - Change one variable at a time. Re-export after each accepted change.
 
@@ -26,6 +27,21 @@ Leading rule: never strand management access.
 - Keep pins, voltage, and brownout behavior in mind before changing Wi-Fi, watchdog, or reboot paths.
 - Prefer static lease or reserved DHCP for infrastructure portals; document the reservation.
 - Avoid OTA/flashing changes without a local serial fallback.
+
+## Revert block shape
+
+End with the smallest explicit block, e.g.:
+
+```rsc
+# revert for: <one-line description of the change>
+# safest: restore the backup taken before the change
+/system backup load file=pre-change-YYYYMMDD-HHMMSS.backup
+# or, if exact commands are cleaner:
+/ip firewall filter remove [find comment="pulse-change"]
+/ip firewall nat remove [find comment="pulse-change"]
+```
+
+Use `comment="pulse-change"` (or the change-specific marker) on everything created so revert can target it without guessing by index.
 
 ## If the user asks to "just apply it"
 
