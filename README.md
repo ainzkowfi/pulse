@@ -22,7 +22,7 @@ What it does:
 
 What it is not:
 
-- Not an installer with hidden side effects — npm distribution ships files; wiring into OpenCode is explicit.
+- Not an installer with hidden side effects — wiring into OpenCode is explicit (clone + symlink, commands in this README).
 - Not a push bot — you push manually; the agent commits only when told.
 - Not harness-agnostic — this is for OpenCode only.
 - Not provider-locked — no model is baked into the agent prompt.
@@ -42,7 +42,7 @@ config/ponytail.json            ponytail defaults (full)
 memory/MEMORY.global.template.md   seed for global user memory
 memory/MEMORY.project.template.md  seed for per-project memory
 AGENTS.md                      repo traps; install stays in this README
-package.json                   npm distribution (`pulse-opencode-agent`); no install scripts
+package.json                   local check metadata only; `scripts/check.sh`, no published install path
 ```
 
 ## Install — paste this into opencode
@@ -81,7 +81,7 @@ Per project, paste instead/also:
 
 No restart for agent/memory changes — opencode watches config files (`/reload` in the TUI forces it). Restart opencode after changing `dcp.jsonc`.
 
-## Manual install (fallback)
+## Install
 
 ```sh
 git clone <repo-url> ~/pulse
@@ -111,30 +111,6 @@ cp ~/pulse/memory/MEMORY.global.template.md ~/.config/opencode/memory/MEMORY.md 
 
 Per project: `mkdir -p .pulse/memory && cp ~/pulse/memory/MEMORY.project.template.md .pulse/memory/MEMORY.md && echo '.pulse/' >> .gitignore`
 
-## Install from npm
-
-`pulse-opencode-agent` is a public npm snapshot of this repo for OpenCode only. It does **not** run an installer; after installing, wire the files into opencode the same way, using `$PULSE_ROOT` instead of `~/pulse`:
-
-```sh
-npm install -g pulse-opencode-agent
-PULSE_ROOT="$(npm root -g)/pulse-opencode-agent"
-mkdir -p ~/.config/opencode/{agents,plugins,memory,skills}
-ln -s "$PULSE_ROOT/agent/pulse.md" ~/.config/opencode/agents/pulse.md
-ln -s "$PULSE_ROOT/agent/reviewer.md" ~/.config/opencode/agents/reviewer.md
-[ -e ~/.config/opencode/skills/routeros-network-ops ] || ln -s "$PULSE_ROOT/skills/routeros-network-ops" ~/.config/opencode/skills/routeros-network-ops
-# plugins/configs: only if absent
-[ -e ~/.config/opencode/plugins/caveman.ts ] || ln -s "$PULSE_ROOT/plugins/caveman.ts" ~/.config/opencode/plugins/caveman.ts
-[ -e ~/.config/opencode/plugins/ponytail.ts ] || ln -s "$PULSE_ROOT/plugins/ponytail.ts" ~/.config/opencode/plugins/ponytail.ts
-[ -e ~/.config/opencode/caveman.json ] || ln -s "$PULSE_ROOT/config/caveman.json" ~/.config/opencode/caveman.json
-[ -e ~/.config/opencode/ponytail.json ] || ln -s "$PULSE_ROOT/config/ponytail.json" ~/.config/opencode/ponytail.json
-[ -e ~/.config/opencode/dcp.jsonc ] || ln -s "$PULSE_ROOT/config/dcp.jsonc" ~/.config/opencode/dcp.jsonc
-opencode plugin add @tarquinen/opencode-dcp@latest
-# set "default_agent": "pulse" in ~/.config/opencode/opencode.jsonc (keep other settings)
-cp "$PULSE_ROOT/memory/MEMORY.global.template.md" ~/.config/opencode/memory/MEMORY.md   # first machine only
-```
-
-Install the required skills from the Manual install section. Update later with `npm update -g pulse-opencode-agent`; existing symlinks keep resolving to the same paths. If you want `git pull` semantics instead, use the git install above.
-
 ## Memory model
 
 - **Global** (`~/.config/opencode/memory/MEMORY.md`) — about the user, learned across projects. Preferences, style, decisions that hold everywhere.
@@ -144,14 +120,12 @@ Install the required skills from the Manual install section. Update later with `
 
 ## Context pruning
 
-DCP plugin, config in `config/dcp.jsonc`: protects the last 4 turns and user messages; subagents may be pruned; compression thresholds 35%/70% of model window. This repo does not tune DCP dedupe/purge behavior. Restart opencode after config changes.
+DCP plugin, config in `config/dcp.jsonc`: protects the last 4 turns and user messages; subagents may be pruned; compression starts at 25% and targets 55% of model window. This repo does not tune DCP dedupe/purge behavior. Restart opencode after config changes.
 
 ## Updating
 
 ```sh
-cd ~/pulse && git pull          # git install
-# or
-npm update -g pulse-opencode-agent   # npm install
+cd ~/pulse && git pull
 ```
 
 Symlinked machines live immediately. Else re-copy `pulse.md`, `reviewer.md`, plugins, configs, and the bundled skill after pull. Skills installed via `npx skills ... -g` are copies, not symlinks — re-run the add commands (or `npx skills update -g` where supported) to refresh them.
@@ -168,4 +142,4 @@ bash scripts/check.sh                        # package/README/pulse drift check
 
 `/api/agent` should list `pulse`; `/api/skill` should list the repo's required skills. Restart opencode after `config/dcp.jsonc` changes; agent and memory edits watch/reload without one.
 
-Context note: DCP + handoff + memory keep long sessions usable. No build/test suite exists in this repo — verify via the checks above, not `npm test`.
+Context note: DCP + handoff + memory keep long sessions usable. No test suite exists in this repo — verify via the checks above.

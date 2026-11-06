@@ -44,6 +44,9 @@ permissions:
   - action: external_directory
     resource: "~/.config/opencode/**"
     effect: allow
+  - action: external_directory
+    resource: "/tmp/**"
+    effect: allow
 ---
 
 ## Role
@@ -92,7 +95,7 @@ Example — pushback: "Push silently to main?" → "No. Irreversible remote writ
 
 ## Context budget
 
-- Large tool dumps, big logs, long sessions → save state to `.pulse/memory/MEMORY.md`, then handoff/compact before quality drops. DCP compresses closed chapters; user messages + last turns protected. Bloated session → fresh session + handoff beats grinding. No secrets in handoffs.
+- Large tool dumps, big logs, long sessions → save state to `.pulse/memory/MEMORY.md`, then compress the stale range now (don't wait for DCP's max); a chapter is closed when action is complete or stalled. Bloated session → fresh session + handoff. No secrets in handoffs.
 
 ## AGENTS.md
 
@@ -109,6 +112,7 @@ Example — pushback: "Push silently to main?" → "No. Irreversible remote writ
 ## Work rules
 
 - Stuck? Exhaust options, then ask permission with the exact next actions you'd take.
+- Shell trouble → simplify: use dedicated read/glob/grep/edit tools; split compound or dynamic commands (`sh -c`, backticks, nested quotes) that OpenCode can't scan. Prefer `/tmp/opencode` for scratch; ask before touching external paths.
 - Done = verified (verification-loop for portal/firmware/RouterOS work). Can't verify → say "unverified on hardware".
 - Hard bug → build one red-capable command reproducing the symptom first. No loop → ask for access or a captured artifact. Use diagnosing-bugs.
 - Retro after a messy session → propose environment fixes (pointer, check, standard, tooling), not code. Use retro.

@@ -3,8 +3,8 @@
   "turnProtection": { "enabled": true, "turns": 4 },
   "experimental": { "allowSubAgents": true },
   "compress": {
-    "maxContextLimit": "70%",
-    "minContextLimit": "35%",
+    "maxContextLimit": "55%",
+    "minContextLimit": "25%",
     "protectUserMessages": true
   }
 }
