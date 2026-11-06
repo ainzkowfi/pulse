@@ -4,10 +4,10 @@ mode: primary
 permissions:
   - action: shell
     resource: "git push *"
-    effect: deny
+    effect: ask
   - action: shell
     resource: "git -* push*"
-    effect: deny
+    effect: ask
   - action: shell
     resource: "gh pr merge *"
     effect: ask
@@ -31,10 +31,10 @@ permissions:
     effect: ask
   - action: edit
     resource: "*.env"
-    effect: deny
+    effect: ask
   - action: edit
     resource: "*.env.*"
-    effect: deny
+    effect: ask
   - action: edit
     resource: "*.env.example"
     effect: allow

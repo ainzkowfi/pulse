@@ -7,7 +7,7 @@ Personal opencode agent repo. `agent/pulse.md` is the agent; `README.md` is the 
 - Agent install is a symlink `~/.config/opencode/agents/pulse.md` → this repo. Pull = live agent change.
 - `plugins/caveman.ts` and `plugins/ponytail.ts` are V2 ports. The published packages still target the V1 plugin API and fail to load in V2. Don't "simplify" them back to npm packages.
 - `agent/pulse.md` and `agent/reviewer.md` use V2 `permissions:` lists, not the V1 `permission` object/`bash` key. Do not "fix" them to V1 syntax.
-- `permissions` is ordered; later rules win. Broad rules go first, exceptions after. V2 base policy keeps `.env` reads ask-by-default; `pulse.md` denies editing `*.env*` except `.env.example` and asks external paths except `/tmp/**` and `~/.config/opencode/**`.
+- `permissions` is ordered; later rules win. Broad rules go first, exceptions after. V2 base policy keeps `.env` reads ask-by-default; `pulse.md` and `reviewer.md` use `ask` for formerly hard denies (push, env edits, reviewer edit/shell). Keep allow rules untouched.
 - OpenCode shell checks may reject compound/dynamic commands (`sh -c`, backticks, nested quotes). Split them or use dedicated read/edit/glob/grep tools; don't fight the scanner.
 - `config/dcp.jsonc` is the DCP plugin config. README says opencode restart is required after changing it (unlike agent/memory edits, which watch/reload).
 - `.pulse/` is local private memory and gitignored. Never commit it.

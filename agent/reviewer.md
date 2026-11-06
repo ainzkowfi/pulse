@@ -4,10 +4,10 @@ mode: subagent
 permissions:
   - action: edit
     resource: "*"
-    effect: deny
+    effect: ask
   - action: shell
     resource: "*"
-    effect: deny
+    effect: ask
   - action: shell
     resource: "git diff *"
     effect: allow
