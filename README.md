@@ -36,9 +36,11 @@ agent/reviewer.md               read-only reviewer subagent (visible to main age
 skills/routeros-network-ops/    RouterOS/hotspot/ESP safety skill (bundled)
 plugins/caveman.ts              caveman mode plugin (V2 port)
 plugins/ponytail.ts             ponytail mode plugin (V2 port)
+plugins/casually.ts             original dry-sarcastic communication mode plugin
 config/dcp.jsonc                dynamic context pruning (DCP plugin) config
-config/caveman.json             caveman defaults (full)
+config/caveman.json             caveman defaults (off)
 config/ponytail.json            ponytail defaults (full)
+config/casually.json            casually defaults (full)
 memory/MEMORY.global.template.md   seed for global user memory
 memory/MEMORY.project.template.md  seed for per-project memory
 AGENTS.md                      repo traps; install stays in this README
@@ -55,8 +57,9 @@ On any machine, open a session and paste (replace `<repo-url>` with the git URL)
 > 3. Symlink `~/pulse/agent/pulse.md` → `~/.config/opencode/agents/pulse.md` and `~/pulse/agent/reviewer.md` → `~/.config/opencode/agents/reviewer.md` (if symlinks aren't supported, e.g. plain Windows, use `cp` instead and re-copy after every pull).
 > 4. Install the bundled skill only if absent: `mkdir -p ~/.config/opencode/skills && ln -s ~/pulse/skills/routeros-network-ops ~/.config/opencode/skills/routeros-network-ops`.
 > 5. Install required plugins only where missing; never overwrite an existing file:
->    - Symlink `~/pulse/plugins/caveman.ts` and `~/pulse/plugins/ponytail.ts` into `~/.config/opencode/plugins/`.
->    - Symlink `~/pulse/config/caveman.json`, `ponytail.json`, `dcp.jsonc` into `~/.config/opencode/` if absent.
+>    - Symlink `~/pulse/plugins/caveman.ts`, `~/pulse/plugins/ponytail.ts`, and `~/pulse/plugins/casually.ts` into `~/.config/opencode/plugins/`.
+>    - Symlink `~/pulse/config/caveman.json`, `ponytail.json`, `casually.json`, `dcp.jsonc` into `~/.config/opencode/` if absent.
+>    - Keep at most one terse tone mode active (`/caveman off` or `/casually off`) if both load.
 >    - `opencode plugin add @tarquinen/opencode-dcp@latest` (skip if already in `opencode.json`)
 > 6. Install required skills only if absent from both `~/.config/opencode/skills` and `~/.agents/skills`:
 >    - `npx skills add vercel-labs/skills@find-skills -g -y`
@@ -92,8 +95,10 @@ ln -s ~/pulse/agent/reviewer.md ~/.config/opencode/agents/reviewer.md
 # plugins/configs: only if absent
 [ -e ~/.config/opencode/plugins/caveman.ts ] || ln -s ~/pulse/plugins/caveman.ts ~/.config/opencode/plugins/caveman.ts
 [ -e ~/.config/opencode/plugins/ponytail.ts ] || ln -s ~/pulse/plugins/ponytail.ts ~/.config/opencode/plugins/ponytail.ts
+[ -e ~/.config/opencode/plugins/casually.ts ] || ln -s ~/pulse/plugins/casually.ts ~/.config/opencode/plugins/casually.ts
 [ -e ~/.config/opencode/caveman.json ] || ln -s ~/pulse/config/caveman.json ~/.config/opencode/caveman.json
 [ -e ~/.config/opencode/ponytail.json ] || ln -s ~/pulse/config/ponytail.json ~/.config/opencode/ponytail.json
+[ -e ~/.config/opencode/casually.json ] || ln -s ~/pulse/config/casually.json ~/.config/opencode/casually.json
 [ -e ~/.config/opencode/dcp.jsonc ] || ln -s ~/pulse/config/dcp.jsonc ~/.config/opencode/dcp.jsonc
 opencode plugin add @tarquinen/opencode-dcp@latest
 # skills: only if absent
@@ -133,7 +138,7 @@ Symlinked machines live immediately. Else re-copy `pulse.md`, `reviewer.md`, plu
 ## Verify
 
 ```sh
-opencode plugin list                         # caveman, ponytail, opencode-dcp
+opencode plugin list                         # caveman, ponytail, casually, opencode-dcp
 opencode api get /api/skill --param 'location[directory]=$PWD'
 opencode api get /api/agent                  # should list pulse
 git status --short                           # clean = committed state below

@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 const root = new URL('..', import.meta.url).pathname;
 const tmp = mkdtempSync(join(tmpdir(), 'pulse-plugins-'));
 
-for (const [file, config] of [['caveman.json', '{"enabled":true,"defaultMode":"full"}'], ['ponytail.json', '{"enabled":true,"defaultMode":"full"}']]) {
+for (const [file, config] of [['caveman.json', '{"enabled":true,"defaultMode":"full"}'], ['ponytail.json', '{"enabled":true,"defaultMode":"full"}'], ['casually.json', '{"enabled":true,"defaultMode":"full"}']]) {
   writeFileSync(join(tmp, file), config);
 }
 
@@ -34,7 +34,7 @@ async function setup(name) {
   return { hooks, commands, sent };
 }
 
-for (const name of ['caveman', 'ponytail']) {
+for (const name of ['caveman', 'ponytail', 'casually']) {
   const { hooks, commands, sent } = await setup(name);
   const first = { sessionID: 's', system: [] };
   await hooks.context(first);
