@@ -9,7 +9,7 @@ Leading rule: never strand management access.
 
 ## Before touching a live RouterOS device
 
-- Inventory before design: model, RouterOS version, license level, installed packages, CPU/RAM/flash, port count/PoE budget, and wireless support. Read these from the device; don't assume a feature exists because another model has it. Design within those limits or say what won't fit.
+- Inventory before design: model, RouterOS version, license level, installed packages, CPU/RAM/flash, port count/PoE budget, and wireless support. Read these from the device; don't assume a feature exists because another model has it. Design within those limits or say what won't fit. Persist the inventory facts to project memory so the next session skips re-reading unless the device changed.
 - Export and backup first (`/export file=...` for diffs/restore-by-readable-config, `/system backup save` for secret-bearing restore). Note interfaces in use and current default route/DNS.
 - Confirm you have a second path back: another interface, serial/console, or a recorded backup you can restore.
 - End every response that makes/applies a live RouterOS change with a paste-ready revert script: the exact commands (or the exact restore command for the recorded backup) to undo what the response just changed. If a change cannot be represented as a script, say why and give the safest equivalent (backup restore, reset, reflash). Never emit an apply-script without the revert block.

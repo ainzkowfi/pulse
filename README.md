@@ -1,14 +1,15 @@
 # pulse
 
-Personal [opencode](https://opencode.ai) agent. Resolves material ambiguity before acting; low-risk work proceeds directly. Researches when unsure. Terse senior-dev output. Ponytail rules: YAGNI, shortest working diff, delete over add.
+Personal [opencode](https://opencode.ai) agent for RouterOS/MikroTik network ops, with senior web development as the secondary lane. Resolves material ambiguity before acting; low-risk work proceeds directly. Researches when unsure. Terse senior-dev output. Ponytail rules: YAGNI, shortest working diff, delete over add.
 
 ## What is Pulse?
 
-Pulse is a personal, model-agnostic OpenCode agent for senior web development and network operations work — the kind where a wrong guess is expensive and a long vibe-coded answer is useless. It is terse by design, researches when it is unsure, and fills gaps only with evidence or explicit assumptions.
+Pulse is a personal, model-agnostic OpenCode agent built mainly for MikroTik RouterOS work — configuration, firewall/NAT, hotspot, scripting, diagnostics — with senior web development as a secondary lane. It is for work where a wrong guess is expensive and a long vibe-coded answer is useless. It is terse by design, researches when it is unsure, and fills gaps only with evidence or explicit assumptions.
 
 What it does:
 
 - Reads the room first: repo `AGENTS.md`, project `.pulse/memory/MEMORY.md`, and your global memory before acting.
+- Grounds RouterOS answers in versioned docs through the local `rosetta` MCP: command trees, CLI reference fields, hardware specs, and changelogs. Read-only, no router credentials.
 - Carries RouterOS/network-op safety defaults: inventory device limits and capabilities first, export/backup before changes, a one-shot 5-minute rollback scheduler on the device for reachability-affecting changes, and a paste-ready revert script at the end of every state-changing response. The scheduler stays armed until you explicitly confirm the new config is stable.
 - Resolves material ambiguity before acting; low-risk, obvious tasks proceed directly. Deep dives only when warranted.
 - When it asks with options, each option says what it does/costs/changes; recommended option first.
@@ -63,14 +64,16 @@ On any machine, open a session and paste (replace `<repo-url>` with the git URL)
 >    - `npx skills add affaan-m/ecc@verification-loop -g -y`
 >    - `npx skills add vercel-labs/agent-skills@web-design-guidelines -g -y`
 >    - `npx skills add pbakaus/impeccable@impeccable -g -y`
+>    - `npx skills add tikoci/routeros-skills@routeros-scripting -g -y`
 >    - `npx skills@latest add mattpocock/skills --skill=diagnosing-bugs -g -y`
 >    - `npx skills@latest add mattpocock/skills --skill=writing-for-agents -g -y`
 >    - `npx skills@latest add mattpocock/skills --skill=retro -g -y`
 >    - `npx skills@latest add mattpocock/skills --skill=handoff -g -y`
->    - These four ship supporting files; install the full skill directories, not only `SKILL.md`.
+>    - These five ship supporting files; install the full skill directories, not only `SKILL.md`.
 > 7. Set `default_agent` to `"pulse"` in `~/.config/opencode/opencode.jsonc` (preserve all existing settings in the file).
 > 8. If `~/.config/opencode/memory/MEMORY.md` does not exist, seed it from `~/pulse/memory/MEMORY.global.template.md`. Never overwrite an existing one.
-> 9. Report what was done and what was skipped.
+> 9. Install the RouterOS docs MCP: `curl -fsSL https://bun.sh/install | bash`, then `"$HOME/.bun/bin/bunx" @tikoci/rosetta --setup`. Merge the `rosetta` entry from the README's “RouterOS docs MCP” section into the active OpenCode config (`opencode.json` or `opencode.jsonc`, `mcp` object; point `PATH` at `$HOME/.bun/bin`). Skip if already present.
+> 10. Report what was done and what was skipped.
 
 Per project, paste instead/also:
 
@@ -96,11 +99,15 @@ ln -s ~/pulse/agent/reviewer.md ~/.config/opencode/agents/reviewer.md
 [ -e ~/.config/opencode/casually.json ] || ln -s ~/pulse/config/casually.json ~/.config/opencode/casually.json
 [ -e ~/.config/opencode/dcp.jsonc ] || ln -s ~/pulse/config/dcp.jsonc ~/.config/opencode/dcp.jsonc
 opencode plugin add @tarquinen/opencode-dcp@latest
+# RouterOS docs MCP (rosetta) — ~400MB DB; merge the config entry from the section below
+curl -fsSL https://bun.sh/install | bash
+"$HOME/.bun/bin/bunx" @tikoci/rosetta --setup
 # skills: only if absent
 npx skills add vercel-labs/skills@find-skills -g -y
 npx skills add affaan-m/ecc@verification-loop -g -y
 npx skills add vercel-labs/agent-skills@web-design-guidelines -g -y
 npx skills add pbakaus/impeccable@impeccable -g -y
+npx skills add tikoci/routeros-skills@routeros-scripting -g -y
 npx skills@latest add mattpocock/skills --skill=diagnosing-bugs -g -y
 npx skills@latest add mattpocock/skills --skill=writing-for-agents -g -y
 npx skills@latest add mattpocock/skills --skill=retro -g -y
@@ -110,6 +117,32 @@ cp ~/pulse/memory/MEMORY.global.template.md ~/.config/opencode/memory/MEMORY.md 
 ```
 
 Per project: `mkdir -p .pulse/memory && cp ~/pulse/memory/MEMORY.project.template.md .pulse/memory/MEMORY.md && echo '.pulse/' >> .gitignore`
+
+## RouterOS docs MCP — rosetta
+
+Pulse expects [`tikoci/rosetta`](https://github.com/tikoci/rosetta) locally. It is an offline RouterOS 7 knowledge base over stdio MCP: docs, CLI reference fields, versioned command trees, hardware specs, changelogs. Full-text search, no embeddings, no API keys, no router connection.
+
+```sh
+curl -fsSL https://bun.sh/install | bash
+"$HOME/.bun/bin/bunx" @tikoci/rosetta --setup   # downloads ~400MB DB to ~/.rosetta
+```
+
+Add the printed entry to `~/.config/opencode/opencode.json` (or `.jsonc`):
+
+```json
+"mcp": {
+  "rosetta": {
+    "type": "local",
+    "command": ["/root/.bun/bin/bunx", "@tikoci/rosetta"],
+    "enabled": true,
+    "environment": {
+      "PATH": "/root/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    }
+  }
+}
+```
+
+The explicit `PATH` matters: rosetta's bin shebang calls `bun`, which is not on the default OpenCode PATH. Replace `/root` with your own `$HOME` outside this machine. Refresh with `"$HOME/.bun/bin/bunx" @tikoci/rosetta@latest --refresh`; restart OpenCode after config changes.
 
 ## Memory model
 
@@ -134,6 +167,7 @@ Symlinked machines live immediately. Else re-copy `pulse.md`, `reviewer.md`, plu
 
 ```sh
 opencode plugin list                         # ponytail, casually, opencode-dcp
+opencode mcp list                            # chrome-devtools, firecrawl, rosetta connected
 opencode api get /api/skill --param 'location[directory]=$PWD'
 opencode api get /api/agent                  # should list pulse
 git status --short                           # clean = committed state below

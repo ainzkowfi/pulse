@@ -12,7 +12,8 @@ Personal opencode agent repo. `agent/pulse.md` is the agent; `README.md` is the 
 - `config/dcp.jsonc` is the DCP plugin config. README says opencode restart is required after changing it.
 - DCP `minContextLimit` is deliberately `90%` to suppress unresolved nudge spam (issue #662); don't lower it unless the DCP nudge bug is fixed upstream.
 - `.pulse/` is local private memory and gitignored. Never commit it.
-- The bundled RouterOS skill and its install path are part of the repo/README. Keep README, `scripts/check.sh`, and this file in sync.
+- `rosetta` (RouterOS docs MCP) is a user-level install, not a repo file: bun at `~/.bun/bin`, ~400MB DB at `~/.rosetta`, config in `~/.config/opencode/opencode.json`. Its bin shebang needs `bun` on PATH, so the MCP entry sets `PATH` explicitly. README owns install; don't add it to `package.json` files.
+- The bundled RouterOS skill and its install path are part of the repo/README. Keep README, `scripts/check.sh`, and this file in sync. `routeros-scripting` is a required external skill (`tikoci/routeros-skills@routeros-scripting`, lands in `~/.agents/skills/`); README owns its install and `check.sh` enforces the `pulse.md` branch.
 - The skills installed by the README's mattpocock npx commands are copies in `~/.config/opencode/skills/`. They are not tracked by this repo and do not auto-update.
 - `agent/reviewer.md` is a visible read-only reviewer subagent (V2 `permissions` list denies edit/shell, allows `git diff|log|show`). If you change its mode or permissions, update README and verify with `bash scripts/check.sh`.
 - No build/test suite. Verification is manual: `opencode plugin list`, `opencode api get /api/skill --param 'location[directory]=$PWD'`, `opencode api get /api/agent`, and `bash scripts/check.sh`.

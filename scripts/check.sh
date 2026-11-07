@@ -24,7 +24,7 @@ for (const ref of ['agent/reviewer.md', 'skills/routeros-network-ops', 'memory/M
   if (!readme.includes(ref)) throw new Error(`README missing ${ref}`);
 }
 
-for (const skill of ['coding-standards', 'tdd-workflow', 'api-design', 'backend/frontend-patterns', 'e2e-testing', 'security-review', 'frontend-slides', 'eval-harness', 'strategic-compact']) {
+for (const skill of ['routeros-network-ops', 'routeros-scripting', 'coding-standards', 'tdd-workflow', 'api-design', 'backend/frontend-patterns', 'e2e-testing', 'security-review', 'frontend-slides', 'eval-harness', 'strategic-compact']) {
   if (!pulse.includes(skill)) throw new Error(`pulse.md skill branch missing ${skill}`);
 }
 
