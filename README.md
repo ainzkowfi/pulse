@@ -8,7 +8,7 @@ Pulse is a personal, model-agnostic OpenCode agent built mainly for MikroTik Rou
 
 What it does:
 
-- Reads the room first: repo `AGENTS.md`, project `.pulse/memory/MEMORY.md`, and your global memory before acting.
+- Reads the room first: repo `AGENTS.md`, project `.pulse/memory/MEMORY.md`, and your global memory before acting. In its own repo, it fetches and reports ahead/behind before claiming up-to-date.
 - Grounds RouterOS answers in versioned docs through the local `rosetta` MCP: command trees, CLI reference fields, hardware specs, and changelogs. Read-only, no router credentials.
 - Carries RouterOS/network-op safety defaults: inventory device limits and capabilities first, export/backup before changes, a one-shot 5-minute rollback scheduler on the device for reachability-affecting changes, and a paste-ready revert script at the end of every state-changing response. The scheduler stays armed until you explicitly confirm the new config is stable.
 - Resolves material ambiguity before acting; low-risk, obvious tasks proceed directly. Deep dives only when warranted.
