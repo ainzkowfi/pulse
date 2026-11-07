@@ -35,10 +35,10 @@ agent/pulse.md                  the agent (V2 file agent)
 agent/reviewer.md               read-only reviewer subagent (visible to main agent)
 skills/routeros-network-ops/    RouterOS/hotspot/ESP safety skill (bundled)
 plugins/ponytail.ts             ponytail mode plugin (V2 port)
-plugins/casually.ts             original dry-sarcastic communication mode plugin
+plugins/casually.ts             original always-on dry-sarcastic ultra plugin
 config/dcp.jsonc                dynamic context pruning (DCP plugin) config
 config/ponytail.json            ponytail defaults (full)
-config/casually.json            casually defaults (full)
+config/casually.json            casually config (always ultra)
 memory/MEMORY.global.template.md   seed for global user memory
 memory/MEMORY.project.template.md  seed for per-project memory
 AGENTS.md                      repo traps; install stays in this README

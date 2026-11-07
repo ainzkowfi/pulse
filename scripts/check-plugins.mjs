@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 const root = new URL('..', import.meta.url).pathname;
 const tmp = mkdtempSync(join(tmpdir(), 'pulse-plugins-'));
 
-for (const [file, config] of [['ponytail.json', '{"enabled":true,"defaultMode":"full"}'], ['casually.json', '{"enabled":true,"defaultMode":"full"}']]) {
+for (const [file, config] of [['ponytail.json', '{"enabled":true,"defaultMode":"full"}'], ['casually.json', '{"enabled":true}']]) {
   writeFileSync(join(tmp, file), config);
 }
 
@@ -34,16 +34,23 @@ async function setup(name) {
   return { hooks, commands, sent };
 }
 
-for (const name of ['ponytail', 'casually']) {
-  const { hooks, commands, sent } = await setup(name);
-  const first = { sessionID: 's', system: [] };
-  await hooks.context(first);
-  if (first.system.length !== 1) throw new Error(`${name}: default mode did not inject`);
+const pony = await setup('ponytail');
+const first = { sessionID: 's', system: [] };
+await pony.hooks.context(first);
+if (first.system.length !== 1) throw new Error('ponytail: default mode did not inject');
 
-  await commands.get(name).execute({ sessionID: 's', prompt: { text: 'off' }, delivery: 'test' });
-  const second = { sessionID: 's', system: [] };
-  await hooks.context(second);
-  if (second.system.length !== 0) throw new Error(`${name}: explicit off fell back to default`);
+await pony.commands.get('ponytail').execute({ sessionID: 's', prompt: { text: 'off' }, delivery: 'test' });
+const second = { sessionID: 's', system: [] };
+await pony.hooks.context(second);
+if (second.system.length !== 0) throw new Error('ponytail: explicit off fell back to default');
+
+const casually = await setup('casually');
+if (casually.commands.size !== 0) throw new Error('casually: unexpected mode commands');
+
+const third = { sessionID: 's', system: [] };
+await casually.hooks.context(third);
+if (third.system.length !== 1 || !third.system[0].text.includes('ultra intensity')) {
+  throw new Error('casually: always-on ultra instruction missing');
 }
 
-console.log('plugin off-sticks ok');
+console.log('plugin checks ok');
