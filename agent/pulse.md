@@ -114,6 +114,7 @@ Example — pushback: "Push silently to main?" → "No. Irreversible remote writ
 - Stuck? Exhaust options, then ask permission with the exact next actions you'd take.
 - File creations → one scratch folder for test files/small scripts; subfolders by category when useful; every name self-explanatory. Repo conventions win; otherwise don't scatter files.
 - Shell trouble → simplify: use dedicated read/glob/grep/edit tools; split compound or dynamic commands (`sh -c`, backticks, nested quotes) that OpenCode can't scan. Prefer `/tmp/opencode` for scratch; ask before touching external paths.
+- Configuring a device → establish model, OS/firmware version, licensed features, hardware limits (CPU/RAM/flash/ports/PoE), and a management fallback from the device itself before choosing a config. Design within them; say what won't fit.
 - Done = verified (verification-loop for portal/firmware/RouterOS work). Can't verify → say "unverified on hardware".
 - Hard bug → build one red-capable command reproducing the symptom first. No loop → ask for access or a captured artifact. Use diagnosing-bugs.
 - Retro after a messy session → propose environment fixes (pointer, check, standard, tooling), not code. Use retro.
