@@ -168,7 +168,16 @@ LOCKOUT_WARN_PATTERNS: list[tuple[str, re.Pattern[str], str]] = [
         re.compile(r"(?:^|/)system\s+shutdown\b", re.IGNORECASE),
         "`/system shutdown` powers the device off. Needs a wake plan.",
     ),
+    (
+        "lockout/reboot",
+        re.compile(r"(?:^|/)system\s+reboot\b", re.IGNORECASE),
+        "`/system reboot` reboots the device. The rollback timer assumes it stays up.",
+    ),
 ]
+
+# Generic fallback: any `remove`/`disable` on `[find]` with no `where`, in any
+# menu. The named menus above stay errors; everything else warns.
+GENERIC_BULK_RE = re.compile(r"(?:^|\s)(?:remove|disable)\s*\[\s*find\s*\]", re.IGNORECASE)
 
 # Menus where `add` should be preceded by a `:if ([:len [... find where ...]] = 0)` guard.
 IDEMPOTENT_MENUS: dict[str, re.Pattern[str]] = {
@@ -279,6 +288,11 @@ def _normalize_menu(raw: str) -> str:
 def _norm(stripped: str) -> str:
     """Slash-path form to space form so `/ip/firewall/nat add` matches `ip firewall nat add`."""
     return re.sub(r"\s+", " ", stripped.replace("/", " ")).strip()
+
+
+def _strip_code(code: str) -> str:
+    """Remove strings and `#` comment tails for keyword matching."""
+    return re.sub(r"#.*$", "", _strip_strings(code)).strip()
 
 
 def _strip_strings(code: str) -> str:
@@ -471,9 +485,21 @@ def lint_text(text: str) -> list[Finding]:
             if rx.search(effective):
                 findings.append(Finding(lineno, ERROR, rule, msg, stripped))
 
+        bulk_hit = False
         for rule, rx, msg in BULK_REMOVE_PATTERNS:
             if rx.search(effective):
                 findings.append(Finding(lineno, ERROR, rule, msg, stripped))
+                bulk_hit = True
+        if not bulk_hit and GENERIC_BULK_RE.search(effective):
+            findings.append(
+                Finding(
+                    lineno,
+                    WARNING,
+                    "dangerous/unconditional-bulk",
+                    "`remove`/`disable` on `[find]` with no `where` filter affects every entry in the menu.",
+                    stripped,
+                )
+            )
 
         for rule, rx, msg in LOCKOUT_WARN_PATTERNS:
             if rx.search(effective):
@@ -486,10 +512,10 @@ def lint_text(text: str) -> list[Finding]:
         fmatch = FOREACH_FIND_RE.search(stripped)
         start_code = _strip_strings(stripped)
         depth = start_code.count("{") - start_code.count("}")
-        body_with_remove = bool(fmatch and re.search(r"\bremove\s", stripped, re.IGNORECASE))
+        body_with_remove = bool(fmatch and re.search(r"\bremove\s", _strip_code(stripped), re.IGNORECASE))
         if fmatch and not body_with_remove and depth > 0:
-            for ahead in lines[lineno : lineno + 10]:
-                if re.search(r"\bremove\s", ahead.strip(), re.IGNORECASE):
+            for ahead in lines[lineno : lineno + 200]:
+                if re.search(r"\bremove\s", _strip_code(ahead), re.IGNORECASE):
                     body_with_remove = True
                     break
                 ahead_code = _strip_strings(ahead)
