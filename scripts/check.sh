@@ -57,7 +57,15 @@ python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/ro
 [ $? -ne 1 ] && { echo "fixture bulk-remove.rsc should exit 1" >&2; exit 1; }
 python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/destructive.rsc" >/dev/null
 [ $? -ne 1 ] && { echo "fixture destructive.rsc should exit 1" >&2; exit 1; }
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/concat-log.rsc" --strict >/dev/null
+[ $? -ne 1 ] && { echo "fixture concat-log.rsc --strict should exit 1" >&2; exit 1; }
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/foreach-remove.rsc" --strict >/dev/null
+[ $? -ne 1 ] && { echo "fixture foreach-remove.rsc --strict should exit 1" >&2; exit 1; }
 set -e
 python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/clean.rsc" >/dev/null
 python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/benign-log.rsc" >/dev/null
+set +e
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/slash-add.rsc" --strict >/dev/null
+[ $? -ne 1 ] && { echo "fixture slash-add.rsc --strict should exit 1" >&2; exit 1; }
+set -e
 echo "linter fixtures ok"

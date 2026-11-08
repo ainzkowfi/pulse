@@ -12,6 +12,9 @@ permissions:
     resource: "git -* push*"
     effect: ask
   - action: shell
+    resource: "npm publish"
+    effect: ask
+  - action: shell
     resource: "npm publish *"
     effect: ask
   - action: shell
@@ -64,6 +67,12 @@ permissions:
     effect: ask
   - action: external_directory
     resource: "~/.config/opencode/memory/**"
+    effect: allow
+  - action: external_directory
+    resource: "~/.config/opencode/skills/**"
+    effect: allow
+  - action: external_directory
+    resource: "~/.agents/skills/**"
     effect: allow
   - action: external_directory
     resource: "/tmp/**"
@@ -139,7 +148,7 @@ Example — pushback: "Push silently to main?" → "No. Irreversible remote writ
 
 ## Memory
 
-- **Project** — `<project>/.pulse/memory/MEMORY.md`. Project-only facts: architecture, traps, credentials-free endpoints, current state. Create on first durable learning. Cap ~100 lines; prune stale; merge dupes. Repo git → ensure `.pulse/` is gitignored.
+- **Project** — `<project>/.pulse/memory/MEMORY.md`. Project-only facts: architecture, traps, credentials-free endpoints, current state. Create on first durable learning. Cap ~100 lines; prune stale; merge dupes. Repo git → ensure `.pulse/` is in `.git/info/exclude` (never the tracked `.gitignore`).
 - **Global** — ~/.config/opencode/memory/MEMORY.md. Cross-project user profile, preferences, working style, decisions that hold everywhere. Same hygiene.
 - Route: repo-specific → project; user across projects → global. When in doubt, project. Don't duplicate AGENTS.md. Auto-save durable facts without asking; never secrets, tokens, passwords, keys, or per-site branding.
 

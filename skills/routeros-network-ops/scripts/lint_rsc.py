@@ -162,7 +162,7 @@ IDEMPOTENT_MENUS: dict[str, re.Pattern[str]] = {
 
 # Guard opener: `:if ([:len [/<menu> find where ...]] = 0) do={`.
 GUARD_OPEN_RE = re.compile(
-    r":if\s*\(\s*\[:len\s+\[\s*/?(?P<menu>[^\[]+?)\s+find\s+where\b"
+    r":if\s*\(\s*\[:len\s+\[\s*/?(?P<menu>[^\[]+?)\s*/?find\s+where\b"
     r"[^\]]*\]\s*\]\s*=\s*0\s*\)\s*do\s*=\s*\{",
     re.IGNORECASE,
 )
@@ -179,19 +179,20 @@ DO_WHILE_RE = re.compile(r":do\s*\{", re.IGNORECASE)
 # Any `import` usage (root or menu-qualified).
 IMPORT_RE = re.compile(r"(?:^|[\s;/])import\b", re.IGNORECASE)
 
-# `:log` interpolation of a secret variable, or concatenation of a value into a log string.
+# `:log` interpolation of a secret-named variable (error).
 LOG_SECRET_RE = re.compile(
-    r":log\b.*\$[A-Za-z_]*\w*(?:password|secret|token|api[-_ ]?key)\b"
-    r"|:log\b.*\(\s*\"[^\"]*\"\s*\.\s*\$",
+    r":log\b.*\$[A-Za-z_]*\w*(?:password|secret|token|api[-_ ]?key)\b",
     re.IGNORECASE,
 )
+# `:log` concatenation of any variable (warning: value in log, not necessarily secret).
+LOG_CONCAT_RE = re.compile(r":log\b.*\(\s*\"[^\"]*\"\s*\.\s*\$", re.IGNORECASE)
 
 # Menu-only line: `/ip firewall filter` with the menu path alone, no command.
-MENU_ONLY_RE = re.compile(
-    r"^/?(?:ip(?:\s+\w+){0,3}|system(?:\s+\w+){0,2}|user|file)\s*$", re.IGNORECASE
-)
+# Tokens include hyphens (`dhcp-server`); the last token must not be a verb.
+MENU_ONLY_RE = re.compile(r"^/?(?:[A-Za-z0-9-]+(?:\s+[A-Za-z0-9-]+)*)\s*$")
+_MENU_VERBS = {"add", "set", "remove", "print", "get", "find", "export", "enable", "disable", "run", "reset", "reset-configuration"}
 
-# `:foreach x in=[/<menu> find] do=` with no `where` — iterates everything.
+# `:foreach x in=[/<menu> find] do=` with no `where` and a `remove` on the line — iterates everything.
 FOREACH_FIND_RE = re.compile(
     r":foreach\b[^\n]*\[\s*/?(?P<menu>[^\]]+?)\s*/?find\s*\]\s*do\s*=",
     re.IGNORECASE,
@@ -233,7 +234,12 @@ class Scope:
 
 
 def _normalize_menu(raw: str) -> str:
-    return re.sub(r"\s+", " ", raw.strip()).lstrip("/")
+    return re.sub(r"\s+", " ", raw.replace("/", " ").strip()).lstrip("/")
+
+
+def _norm(stripped: str) -> str:
+    """Slash-path form to space form so `/ip/firewall/nat add` matches `ip firewall nat add`."""
+    return re.sub(r"\s+", " ", stripped.replace("/", " ")).strip()
 
 
 def _strip_strings(code: str) -> str:
@@ -383,12 +389,12 @@ def lint_text(text: str) -> list[Finding]:
 
         # A menu-only line (`/ip firewall filter`) sets the current menu for
         # the commands that follow it (standard /export layout).
-        if MENU_ONLY_RE.match(stripped):
+        if MENU_ONLY_RE.match(stripped) and stripped.split()[-1].lower() not in _MENU_VERBS:
             current_menu = _normalize_menu(stripped)
             continue
-        # Patterns check the menu-qualified form, so menu-relative commands
+        # Patterns check the normalized form, so menu-relative commands
         # (`remove [find]` under `/ip firewall filter`) are tested too.
-        effective = f"/{current_menu} {stripped}" if current_menu and not stripped.startswith("/") else stripped
+        effective = _norm(f"/{current_menu} {stripped}" if current_menu and not stripped.startswith("/") else stripped)
 
         # ---- Detect what this line opens (consumed when braces open) ----
         guard_menu = None
@@ -421,9 +427,9 @@ def lint_text(text: str) -> list[Finding]:
             if rx.search(effective):
                 findings.append(Finding(lineno, ERROR, rule, msg, stripped))
 
-        # `:foreach x in=[/<menu> find] do=` with no `where` removes every item.
+        # `:foreach x in=[/<menu> find] do=` with no `where` and a `remove` on the line removes every item.
         fmatch = FOREACH_FIND_RE.search(stripped)
-        if fmatch:
+        if fmatch and re.search(r"\bremove\s", stripped, re.IGNORECASE):
             findings.append(
                 Finding(
                     lineno,
@@ -532,6 +538,16 @@ def lint_text(text: str) -> list[Finding]:
                     ERROR,
                     "security/log-secret",
                     "`:log` message references a secret-sounding variable. Never log passwords, tokens, or API keys.",
+                    stripped,
+                )
+            )
+        elif LOG_CONCAT_RE.search(stripped):
+            findings.append(
+                Finding(
+                    lineno,
+                    WARNING,
+                    "security/log-concat",
+                    "`:log` concatenates a variable into the message. Values land in logs; keep secrets out.",
                     stripped,
                 )
             )

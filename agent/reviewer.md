@@ -17,6 +17,15 @@ permissions:
   - action: shell
     resource: "git show *"
     effect: allow
+  - action: shell
+    resource: "git diff --output*"
+    effect: ask
+  - action: shell
+    resource: "git log --output*"
+    effect: ask
+  - action: shell
+    resource: "git show --output*"
+    effect: ask
 ---
 
 Read the relevant code before judging. Review only; do not edit files.

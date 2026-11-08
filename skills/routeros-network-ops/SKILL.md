@@ -49,7 +49,7 @@ Use `comment="pulse-change"` (or the change-specific marker) on everything creat
 
 ## Rollback scheduler shape
 
-Arm this before the change, not after. `start-time=startup` counts the interval from boot, not from when you add the entry — never use it for this timer. Compute the deadline from the device clock and give the entry an explicit `start-date`/`start-time` (now + 5m), then read `next-run` back and confirm it matches before applying the change. The script removes its own timer only after the revert succeeds; a failed revert leaves the timer armed so the next run retries.
+Arm this before the change, not after. `start-time=startup` counts the interval from boot, not from when you add the entry — never use it for this timer. Compute the deadline from the device clock and give the entry an explicit `start-date`/`start-time` (now + 5m; if the deadline crosses midnight, increment the date), then read `next-run` back and confirm it matches before applying the change. The script removes its own timer only after the revert succeeds; a failed revert leaves the timer armed so the next run retries. Revert commands must be idempotent — a half-failed revert retries every 5m until it succeeds or someone removes the timer. The `:onerror` shape has no documented minimum version (it predates 7.14; changelog shows fixes, not introduction) and is unverified on hardware until you see the stored source (`/system script print`) and trigger it once on a lab device.
 
 ```rsc
 # 5-minute rollback; replace id, date/time, and revert commands
