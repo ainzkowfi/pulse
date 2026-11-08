@@ -1,0 +1,2 @@
+/system
+reset-configuration

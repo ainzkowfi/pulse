@@ -50,3 +50,14 @@ console.log('npm pack file list ok');
 NODE
 
 node --experimental-strip-types scripts/check-plugins.mjs
+
+# Linter fixtures: danger cases must fail, benign cases must pass.
+set +e
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/bulk-remove.rsc" >/dev/null
+[ $? -ne 1 ] && { echo "fixture bulk-remove.rsc should exit 1" >&2; exit 1; }
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/destructive.rsc" >/dev/null
+[ $? -ne 1 ] && { echo "fixture destructive.rsc should exit 1" >&2; exit 1; }
+set -e
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/clean.rsc" >/dev/null
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/benign-log.rsc" >/dev/null
+echo "linter fixtures ok"

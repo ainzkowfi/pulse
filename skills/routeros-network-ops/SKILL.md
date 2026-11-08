@@ -14,7 +14,7 @@ Leading rule: never strand management access.
 - Export and backup first (`/export file=...` for diffs/restore-by-readable-config, `/system backup save` for secret-bearing restore). Note interfaces in use and current default route/DNS.
 - Confirm you have a second path back: another interface, serial/console, or a recorded backup you can restore.
 - End every response that makes/applies a live RouterOS change with a paste-ready revert script: the exact commands (or the exact restore command for the recorded backup) to undo what the response just changed. If a change cannot be represented as a script, say why and give the safest equivalent (backup restore, reset, reflash). Never emit an apply-script without the revert block.
-- Before any live change that can affect reachability (firewall/NAT/DHCP/DNS/routes/management), arm a one-shot 5-minute rollback scheduler on the device. It must run the same revert as the end-of-response block. Default timer is 5 minutes; longer only if the user asks.
+- Before any live change that can affect reachability (firewall/NAT/DHCP/DNS/routes/management), arm a 5-minute rollback scheduler on the device. It must run the same revert as the end-of-response block. Default timer is 5 minutes; longer only if the user asks. Read the deadline from the device clock (`/system clock print`), never assume startup-relative timing.
 - After applying, tell the user the rollback deadline. Leave the scheduler armed until the user explicitly confirms the new config is stable; a successful access check is not confirmation. Remove the scheduler and its script only then. If the timer fires, diagnose the revert before reapplying.
 - Use safe mode where it fits your session.
 - Change one variable at a time. Re-export after each accepted change.
@@ -49,18 +49,28 @@ Use `comment="pulse-change"` (or the change-specific marker) on everything creat
 
 ## Rollback scheduler shape
 
-Arm this before the change, not after. A non-zero interval with `start-time=startup` gives the first run 5 minutes after the entry is added (or 5 minutes after boot); the script removes its own timer before reverting so it cannot loop.
+Arm this before the change, not after. `start-time=startup` counts the interval from boot, not from when you add the entry — never use it for this timer. Compute the deadline from the device clock and give the entry an explicit `start-date`/`start-time` (now + 5m), then read `next-run` back and confirm it matches before applying the change. The script removes its own timer only after the revert succeeds; a failed revert leaves the timer armed so the next run retries.
 
 ```rsc
-# one-shot 5-minute rollback; replace id and revert commands
+# 5-minute rollback; replace id, date/time, and revert commands
 /system script add name="pulse-rollback-<id>" source={
-  /system scheduler remove [find name="pulse-rollback-<id>"]
-  :log warning "pulse-rollback-<id>: reverting"
-  <exact revert commands from the response>
-  /system script remove [find name="pulse-rollback-<id>"]
+  :local ok no
+  :onerror e in={
+    :log warning "pulse-rollback-<id>: reverting"
+    <exact revert commands from the response>
+    :set ok yes
+  } do={
+    :log error "pulse-rollback-<id>: revert failed: $e"
+  }
+  :if ($ok) do={
+    /system scheduler remove [find name="pulse-rollback-<id>"]
+    /system script remove [find name="pulse-rollback-<id>"]
+  }
 }
-/system scheduler add name="pulse-rollback-<id>" start-time=startup interval=5m \
+# date/time from /system clock print, deadline = now + 5m
+/system scheduler add name="pulse-rollback-<id>" start-date=<YYYY-MM-DD> start-time=<HH:MM:SS> interval=5m \
   on-event="pulse-rollback-<id>"
+/system scheduler print detail where name="pulse-rollback-<id>"
 ```
 
 After the user explicitly confirms the config is stable:

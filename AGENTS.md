@@ -16,7 +16,7 @@ Personal opencode agent repo. `agent/pulse.md` is the agent; `README.md` is the 
 - Device connection profiles live at `.pulse/memory/devices/<name>.md` (gitignored). They store method/host/port/user/key path and a credential *reference* only. Raw passwords/keys never go in memory files, templates, or any tracked file.
 - The bundled RouterOS skill and its install path are part of the repo/README. Keep README, `scripts/check.sh`, and this file in sync. `routeros-scripting` is a required external skill (`tikoci/routeros-skills@routeros-scripting`, lands in `~/.agents/skills/`); README owns its install and `check.sh` enforces the `pulse.md` branch.
 - The skills installed by the README's mattpocock npx commands are copies in `~/.config/opencode/skills/`. They are not tracked by this repo and do not auto-update.
-- `agent/reviewer.md` is a visible read-only reviewer subagent (V2 `permissions` list denies edit/shell, allows `git diff|log|show`). If you change its mode or permissions, update README and verify with `bash scripts/check.sh`.
+- `agent/reviewer.md` is a visible read-only reviewer subagent (V2 `permissions` list asks edit/shell, allows `git diff|log|show`). If you change its mode or permissions, update README and verify with `bash scripts/check.sh`.
 - No build/test suite. Verification is manual: `opencode plugin list`, `opencode api get /api/skill --param 'location[directory]=$PWD'`, `opencode api get /api/agent`, and `bash scripts/check.sh`.
 
 ## Editing rules

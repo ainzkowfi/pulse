@@ -179,11 +179,24 @@ DO_WHILE_RE = re.compile(r":do\s*\{", re.IGNORECASE)
 # Any `import` usage (root or menu-qualified).
 IMPORT_RE = re.compile(r"(?:^|[\s;/])import\b", re.IGNORECASE)
 
-# `:log <level> "..."` where the message references password / token / secret / apikey.
+# `:log` interpolation of a secret variable, or concatenation of a value into a log string.
 LOG_SECRET_RE = re.compile(
-    r":log\s+\w+\s+[\"'][^\"']*\$?(?:password|secret|token|api[-_ ]?key)",
+    r":log\b.*\$[A-Za-z_]*\w*(?:password|secret|token|api[-_ ]?key)\b"
+    r"|:log\b.*\(\s*\"[^\"]*\"\s*\.\s*\$",
     re.IGNORECASE,
 )
+
+# Menu-only line: `/ip firewall filter` with the menu path alone, no command.
+MENU_ONLY_RE = re.compile(
+    r"^/?(?:ip(?:\s+\w+){0,3}|system(?:\s+\w+){0,2}|user|file)\s*$", re.IGNORECASE
+)
+
+# `:foreach x in=[/<menu> find] do=` with no `where` — iterates everything.
+FOREACH_FIND_RE = re.compile(
+    r":foreach\b[^\n]*\[\s*/?(?P<menu>[^\]]+?)\s*/?find\s*\]\s*do\s*=",
+    re.IGNORECASE,
+)
+
 
 # `set 0 ...` or `remove 2` style fixed-id references.
 FIXED_ID_RE = re.compile(r"(?:^|\s)(?:set|remove)\s+\d+\b")
@@ -333,6 +346,26 @@ def _find_do_onerror_lines(lines: list[str]) -> set[int]:
     return covered
 
 
+def _logical_lines(lines: list[str]) -> list[tuple[int, str]]:
+    r"""Join backslash continuations (RouterOS line continuation) into logical lines."""
+    logical: list[tuple[int, str]] = []
+    buf = ""
+    start = 0
+    for lineno, raw_line in enumerate(lines, start=1):
+        if not buf:
+            start = lineno
+        line = raw_line.rstrip()
+        if line.endswith("\\"):
+            buf += line[:-1] + " "
+            continue
+        buf += line
+        logical.append((start, buf))
+        buf = ""
+    if buf:
+        logical.append((start, buf))
+    return logical
+
+
 def lint_text(text: str) -> list[Finding]:
     findings: list[Finding] = []
     lines = text.splitlines()
@@ -341,11 +374,21 @@ def lint_text(text: str) -> list[Finding]:
     do_onerror_lines = _find_do_onerror_lines(lines)
 
     scopes: list[Scope] = [Scope(kind="root")]
+    current_menu: Optional[str] = None
 
-    for lineno, raw_line in enumerate(lines, start=1):
+    for lineno, raw_line in _logical_lines(lines):
         stripped = raw_line.strip()
         if not stripped or stripped.startswith("#"):
             continue
+
+        # A menu-only line (`/ip firewall filter`) sets the current menu for
+        # the commands that follow it (standard /export layout).
+        if MENU_ONLY_RE.match(stripped):
+            current_menu = _normalize_menu(stripped)
+            continue
+        # Patterns check the menu-qualified form, so menu-relative commands
+        # (`remove [find]` under `/ip firewall filter`) are tested too.
+        effective = f"/{current_menu} {stripped}" if current_menu and not stripped.startswith("/") else stripped
 
         # ---- Detect what this line opens (consumed when braces open) ----
         guard_menu = None
@@ -371,16 +414,29 @@ def lint_text(text: str) -> list[Finding]:
 
         # Destructive commands — always error.
         for rule, rx, msg in DESTRUCTIVE_PATTERNS:
-            if rx.search(stripped):
+            if rx.search(effective):
                 findings.append(Finding(lineno, ERROR, rule, msg, stripped))
 
         for rule, rx, msg in BULK_REMOVE_PATTERNS:
-            if rx.search(stripped):
+            if rx.search(effective):
                 findings.append(Finding(lineno, ERROR, rule, msg, stripped))
+
+        # `:foreach x in=[/<menu> find] do=` with no `where` removes every item.
+        fmatch = FOREACH_FIND_RE.search(stripped)
+        if fmatch:
+            findings.append(
+                Finding(
+                    lineno,
+                    WARNING,
+                    "dangerous/foreach-unconditional-remove",
+                    f"`:foreach` over `[/{fmatch.group('menu').strip()} find]` with no `where` filter iterates every entry in the menu.",
+                    stripped,
+                )
+            )
 
         # Idempotency: `add` in a sensitive menu must be inside a matching guard.
         for menu, rx in IDEMPOTENT_MENUS.items():
-            if rx.search(stripped):
+            if rx.search(effective):
                 if enclosing_guard_menu and (
                     menu in enclosing_guard_menu or enclosing_guard_menu in menu
                 ):

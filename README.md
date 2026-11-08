@@ -79,7 +79,7 @@ Per project, paste instead/also:
 
 > Set up pulse project memory for this repo:
 > 1. `mkdir -p .pulse/memory` and copy `~/pulse/memory/MEMORY.project.template.md` to `.pulse/memory/MEMORY.md` (skip copy if it already exists — never overwrite).
-> 2. Ensure `.pulse/` is in `.gitignore` (append if missing).
+> 2. Ensure `.pulse/` is in `.git/info/exclude` (machine-local; do NOT append it to the tracked `.gitignore`).
 > 3. Report.
 
 No restart for agent/memory changes — opencode watches config files (`/reload` in the TUI forces it). Restart opencode after changing `dcp.jsonc`.
@@ -116,7 +116,7 @@ npx skills@latest add mattpocock/skills --skill=handoff -g -y
 cp ~/pulse/memory/MEMORY.global.template.md ~/.config/opencode/memory/MEMORY.md   # first machine only
 ```
 
-Per project: `mkdir -p .pulse/memory && cp ~/pulse/memory/MEMORY.project.template.md .pulse/memory/MEMORY.md && echo '.pulse/' >> .gitignore`
+Per project: `mkdir -p .pulse/memory && cp ~/pulse/memory/MEMORY.project.template.md .pulse/memory/MEMORY.md && echo '.pulse/' >> .git/info/exclude`
 
 ## RouterOS docs MCP — rosetta
 
@@ -167,7 +167,7 @@ Symlinked machines live immediately. Else re-copy `pulse.md`, `reviewer.md`, plu
 
 ```sh
 opencode plugin list                         # ponytail, casually, opencode-dcp
-opencode mcp list                            # chrome-devtools, firecrawl, rosetta connected
+opencode mcp list                            # rosetta connected (chrome-devtools/firecrawl only if configured)
 opencode api get /api/skill --param 'location[directory]=$PWD'
 opencode api get /api/agent                  # should list pulse
 git status --short                           # clean = committed state below

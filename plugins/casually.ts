@@ -73,6 +73,5 @@ export default {
 
     await ctx.session.hook("context", applyInstruction)
     await ctx.session.hook("compaction", applyInstruction)
-    await ctx.session.hook("title", applyInstruction)
   },
 }

@@ -35,7 +35,7 @@ function loadConfig(directory) {
     if (raw) {
       return {
         enabled: raw.enabled !== false,
-        defaultMode: raw.defaultMode ?? DEFAULTS.defaultMode,
+        defaultMode: MODES.includes(raw.defaultMode) ? raw.defaultMode : DEFAULTS.defaultMode,
         features: { ...DEFAULTS.features, ...raw.features },
       }
     }
@@ -76,7 +76,7 @@ function filterForMode(body, mode) {
 }
 
 function getPonytailInstructions(mode, skillBody) {
-  if (mode === "review") return `PONYTAIL MODE ACTIVE — level: review. Behavior defined by /ponytail-review skill.`
+  if (mode === "review") return getReviewInstructions()
   return `PONYTAIL MODE ACTIVE — level: ${mode}\n\n${filterForMode(skillBody, mode)}`
 }
 

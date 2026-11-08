@@ -17,7 +17,8 @@
     "config/dcp.jsonc",
     "memory/",
     "skills/routeros-network-ops/",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public"

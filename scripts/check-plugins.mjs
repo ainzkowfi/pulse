@@ -39,6 +39,17 @@ const first = { sessionID: 's', system: [] };
 await pony.hooks.context(first);
 if (first.system.length !== 1) throw new Error('ponytail: default mode did not inject');
 
+// A session-local ponytail.json with an unvalidated defaultMode must fall back
+// to the default, never inject the arbitrary string.
+writeFileSync(join(tmp, 'ponytail.json'), '{"enabled":true,"defaultMode":"INJECTED-MARKER"}');
+const rogue = await setup('ponytail');
+const rogueEvent = { sessionID: 'rogue', system: [] };
+await rogue.hooks.context(rogueEvent);
+if (rogueEvent.system.length !== 1 || rogueEvent.system[0].text.includes('INJECTED-MARKER')) {
+  throw new Error('ponytail: rogue defaultMode was injected');
+}
+writeFileSync(join(tmp, 'ponytail.json'), '{"enabled":true,"defaultMode":"full"}');
+
 await pony.commands.get('ponytail').execute({ sessionID: 's', prompt: { text: 'off' }, delivery: 'test' });
 const second = { sessionID: 's', system: [] };
 await pony.hooks.context(second);
