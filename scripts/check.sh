@@ -54,9 +54,11 @@ node --experimental-strip-types scripts/check-plugins.mjs
 # Pinned third-party plugins must load at the pinned version — a silent
 # failure shows up as a missing row here (set SKIP_PLUGIN_CHECK=1 to skip).
 if [ -z "${SKIP_PLUGIN_CHECK:-}" ]; then
+  command -v opencode >/dev/null || { echo "opencode not found (SKIP_PLUGIN_CHECK=1 to skip)" >&2; exit 1; }
+  . "$ROOT/config/plugin-versions.env"
   PLUGINS="$(opencode plugin list 2>/dev/null)"
-  echo "$PLUGINS" | grep -q "ponytail.*@dietrichgebert/ponytail@5.3.3" || { echo "ponytail @5.3.3 not loaded (plugin list: $PLUGINS)" >&2; exit 1; }
-  echo "$PLUGINS" | grep -q "opencode-dcp.*@tarquinen/opencode-dcp@3.2.0" || { echo "opencode-dcp @3.2.0 not loaded" >&2; exit 1; }
+  echo "$PLUGINS" | grep -q "ponytail.*@dietrichgebert/ponytail@$PONYTAIL_VERSION" || { echo "ponytail @$PONYTAIL_VERSION not loaded (plugin list: $PLUGINS)" >&2; exit 1; }
+  echo "$PLUGINS" | grep -q "opencode-dcp.*@tarquinen/opencode-dcp@$DCP_VERSION" || { echo "opencode-dcp @$DCP_VERSION not loaded" >&2; exit 1; }
   echo "plugin load ok"
 fi
 

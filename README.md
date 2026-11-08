@@ -38,6 +38,7 @@ skills/routeros-network-ops/    RouterOS/hotspot/ESP safety skill (bundled)
 plugins/casually.ts             original always-on dry-sarcastic ultra plugin
 config/dcp.jsonc                dynamic context pruning (DCP plugin) config
 config/casually.json            casually config (always ultra)
+config/plugin-versions.env      pinned third-party plugin versions
 memory/MEMORY.global.template.md   seed for global user memory
 memory/MEMORY.project.template.md  seed for per-project memory
 AGENTS.md                      repo traps; install stays in this README
@@ -56,7 +57,7 @@ On any machine, open a session and paste (replace `<repo-url>` with the git URL)
 > 5. Install required plugins only where missing; never overwrite an existing file:
 >    - Symlink `~/pulse/plugins/casually.ts` into `~/.config/opencode/plugins/`.
 >    - Symlink `~/pulse/config/casually.json`, `dcp.jsonc` into `~/.config/opencode/` if absent.
->    - `opencode plugin add @dietrichgebert/ponytail@5.3.3` and `opencode plugin add @tarquinen/opencode-dcp@3.2.0` (skip if already pinned in `opencode.json`)
+>    - Read exact pins from `~/pulse/config/plugin-versions.env`, then `opencode plugin add @dietrichgebert/ponytail@$PONYTAIL_VERSION` and `opencode plugin add @tarquinen/opencode-dcp@$DCP_VERSION` (skip if already pinned in `opencode.json`)
 > 6. Install required skills only if absent from both `~/.config/opencode/skills` and `~/.agents/skills`:
 >    - `npx skills add vercel-labs/skills@find-skills -g -y`
 >    - `npx skills add affaan-m/ecc@verification-loop -g -y`
@@ -94,8 +95,9 @@ ln -s ~/pulse/agent/reviewer.md ~/.config/opencode/agents/reviewer.md
 [ -e ~/.config/opencode/plugins/casually.ts ] || ln -s ~/pulse/plugins/casually.ts ~/.config/opencode/plugins/casually.ts
 [ -e ~/.config/opencode/casually.json ] || ln -s ~/pulse/config/casually.json ~/.config/opencode/casually.json
 [ -e ~/.config/opencode/dcp.jsonc ] || ln -s ~/pulse/config/dcp.jsonc ~/.config/opencode/dcp.jsonc
-opencode plugin add @dietrichgebert/ponytail@5.3.3
-opencode plugin add @tarquinen/opencode-dcp@3.2.0
+. ~/pulse/config/plugin-versions.env
+opencode plugin add "@dietrichgebert/ponytail@$PONYTAIL_VERSION"
+opencode plugin add "@tarquinen/opencode-dcp@$DCP_VERSION"
 # RouterOS docs MCP (rosetta) — ~400MB DB; merge the config entry from the section below
 curl -fsSL https://bun.sh/install | bash
 "$HOME/.bun/bin/bunx" @tikoci/rosetta --setup
