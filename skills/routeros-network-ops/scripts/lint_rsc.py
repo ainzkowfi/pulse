@@ -129,6 +129,45 @@ BULK_REMOVE_PATTERNS: list[tuple[str, re.Pattern[str], str]] = [
         re.compile(r"(?:^|/)file\s+remove\s*\[\s*find\s*\]", re.IGNORECASE),
         "`/file remove [find]` with no filter deletes every file — including backups.",
     ),
+    (
+        "lockout/address-remove",
+        re.compile(r"(?:^|/)ip\s+address\s+remove\s*\[\s*find\s*\]", re.IGNORECASE),
+        "`/ip address remove [find]` with no filter drops every address, including management.",
+    ),
+    (
+        "lockout/route-remove",
+        re.compile(r"(?:^|/)ip\s+route\s+remove\s*\[\s*find\s*\]", re.IGNORECASE),
+        "`/ip route remove [find]` with no filter drops every route, stranding management.",
+    ),
+    (
+        "lockout/interface-disable",
+        re.compile(r"(?:^|/)interface\s+disable\s*\[\s*find\s*\]", re.IGNORECASE),
+        "`/interface disable [find]` with no filter downs every interface.",
+    ),
+    (
+        "lockout/service-disable",
+        re.compile(r"(?:^|/)ip\s+service\s+disable\s*\[\s*find\s*\]", re.IGNORECASE),
+        "`/ip service disable [find]` with no filter kills management services (ssh/api/www).",
+    ),
+    (
+        "lockout/bridge-port-remove",
+        re.compile(r"(?:^|/)interface\s+bridge\s+port\s+remove\s*\[\s*find\s*\]", re.IGNORECASE),
+        "`/interface bridge port remove [find]` with no filter detaches every bridge port.",
+    ),
+]
+
+# Post-reboot / power-off commands worth a second look (warning, not error).
+LOCKOUT_WARN_PATTERNS: list[tuple[str, re.Pattern[str], str]] = [
+    (
+        "lockout/routerboard-upgrade",
+        re.compile(r"(?:^|/)system\s+routerboard\s+upgrade\b", re.IGNORECASE),
+        "`/system routerboard upgrade` reboots the device. Confirm management path survives it.",
+    ),
+    (
+        "lockout/shutdown",
+        re.compile(r"(?:^|/)system\s+shutdown\b", re.IGNORECASE),
+        "`/system shutdown` powers the device off. Needs a wake plan.",
+    ),
 ]
 
 # Menus where `add` should be preceded by a `:if ([:len [... find where ...]] = 0)` guard.
@@ -395,6 +434,9 @@ def lint_text(text: str) -> list[Finding]:
             for rule, rx, msg in DESTRUCTIVE_PATTERNS:
                 if rx.search(_norm(stripped)):
                     findings.append(Finding(lineno, ERROR, rule, msg, stripped))
+            for rule, rx, msg in LOCKOUT_WARN_PATTERNS:
+                if rx.search(_norm(stripped)):
+                    findings.append(Finding(lineno, WARNING, rule, msg, stripped))
             current_menu = _normalize_menu(stripped)
             continue
         # Patterns check the normalized form, so menu-relative commands
@@ -433,16 +475,26 @@ def lint_text(text: str) -> list[Finding]:
             if rx.search(effective):
                 findings.append(Finding(lineno, ERROR, rule, msg, stripped))
 
+        for rule, rx, msg in LOCKOUT_WARN_PATTERNS:
+            if rx.search(effective):
+                findings.append(Finding(lineno, WARNING, rule, msg, stripped))
+
         # `:foreach x in=[/<menu> find] do=` with no `where` and a `remove` in the
-        # loop body (same line or a following line) removes every item.
+        # loop body (same line or a following line) removes every item. One-line
+        # loops (balanced braces) never look ahead; multi-line loops track
+        # brace depth so an inner `}` doesn't stop the scan early.
         fmatch = FOREACH_FIND_RE.search(stripped)
+        start_code = _strip_strings(stripped)
+        depth = start_code.count("{") - start_code.count("}")
         body_with_remove = bool(fmatch and re.search(r"\bremove\s", stripped, re.IGNORECASE))
-        if fmatch and not body_with_remove:
+        if fmatch and not body_with_remove and depth > 0:
             for ahead in lines[lineno : lineno + 10]:
                 if re.search(r"\bremove\s", ahead.strip(), re.IGNORECASE):
                     body_with_remove = True
                     break
-                if ahead.strip() == "}":
+                ahead_code = _strip_strings(ahead)
+                depth += ahead_code.count("{") - ahead_code.count("}")
+                if depth <= 0:
                     break
         if fmatch and body_with_remove:
             findings.append(

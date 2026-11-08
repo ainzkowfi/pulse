@@ -71,5 +71,11 @@ python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/ro
 [ $? -ne 1 ] && { echo "fixture hyphen-menu.rsc --strict should exit 1" >&2; exit 1; }
 python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/bare-destructive.rsc" >/dev/null
 [ $? -ne 1 ] && { echo "fixture bare-destructive.rsc should exit 1" >&2; exit 1; }
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/lockout-remove.rsc" >/dev/null
+[ $? -ne 1 ] && { echo "fixture lockout-remove.rsc should exit 1" >&2; exit 1; }
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/lockout-warn.rsc" --strict >/dev/null
+[ $? -ne 1 ] && { echo "fixture lockout-warn.rsc --strict should exit 1" >&2; exit 1; }
 set -e
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/foreach-readonly.rsc" >/dev/null
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/foreach-readonly.rsc" --strict >/dev/null
 echo "linter fixtures ok"
