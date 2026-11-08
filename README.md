@@ -165,7 +165,7 @@ Symlinked machines live immediately. Else re-copy `pulse.md`, `reviewer.md`, plu
 ## Verify
 
 ```sh
-opencode plugin list                         # ponytail 5.3.3, casually, opencode-dcp 3.2.0
+opencode plugin list                         # ponytail, casually, opencode-dcp (versions in config/plugin-versions.env)
 opencode mcp list                            # rosetta connected (chrome-devtools/firecrawl only if configured)
 opencode api get /api/skill --param 'location[directory]=$PWD'
 opencode api get /api/agent                  # should list pulse

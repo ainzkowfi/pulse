@@ -13,6 +13,7 @@
     "plugins/casually.ts",
     "config/casually.json",
     "config/dcp.jsonc",
+    "config/plugin-versions.env",
     "memory/",
     "skills/routeros-network-ops/",
     "README.md",

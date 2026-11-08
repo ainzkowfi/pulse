@@ -5,7 +5,7 @@ Personal opencode agent repo. `agent/pulse.md` is the agent; `README.md` is the 
 ## Truths
 
 - Agent install is a symlink `~/.config/opencode/agents/pulse.md` → this repo. Pull = live agent change.
-- Ponytail is the official npm plugin (`@dietrichgebert/ponytail@5.3.3`, MIT — npm `license` field verified); the old vendored `plugins/ponytail.ts` port was removed. `plugins/casually.ts` is an original V2 style plugin. Both third-party plugins are pinned to exact versions in `opencode.json`; bump deliberately, never `@latest`.
+- Ponytail is the official npm plugin (`@dietrichgebert/ponytail`, MIT — npm `license` field verified); the old vendored `plugins/ponytail.ts` port was removed. `plugins/casually.ts` is an original V2 style plugin. Both third-party plugins are pinned to exact versions (see `config/plugin-versions.env`) in `opencode.json`; bump deliberately, never `@latest`.
 - `agent/pulse.md` and `agent/reviewer.md` use V2 `permissions:` lists, not the V1 `permission` object/`bash` key. Do not "fix" them to V1 syntax.
 - `permissions` is ordered; later rules win. Broad rules go first, exceptions after. V2 base policy keeps `.env` reads ask-by-default; `pulse.md` and `reviewer.md` use `ask` for formerly hard denies (push, env edits, reviewer edit/shell). Keep allow rules untouched.
 - OpenCode shell checks may reject compound/dynamic commands (`sh -c`, backticks, nested quotes). Split them or use dedicated read/edit/glob/grep tools; don't fight the scanner.
