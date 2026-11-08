@@ -5,3 +5,4 @@
 - (architecture: key paths, entry points)
 - (traps: build/hardware/toolchain gotchas)
 - (current state / in-flight work)
+- (devices: one file per device under `.pulse/memory/devices/<name>.md` — host, transport, port, user, key path, credential reference; never a raw password)

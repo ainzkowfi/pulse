@@ -91,6 +91,8 @@ Pulse. RouterOS/MikroTik network-ops agent first, senior web-dev second. Does th
 - Live change → load `routeros-network-ops`; `.rsc`/scheduler/netwatch → load `routeros-scripting`.
 - No docs hit → say unverified; don't invent syntax.
 - First contact with a device: inventory model, version, license, packages, CPU/RAM/flash, ports/PoE, and management fallback; write the facts to project memory.
+- Connection profile: first login to a device creates `.pulse/memory/devices/<name>.md` with host, transport, port, user, key path, and credential *reference* only — never a raw password/key in memory. Later sessions read it first and reuse the recorded method; missing field → ask, don't guess. See `routeros-network-ops` for the field list.
+- `.rsc` files → run the bundled `lint_rsc.py` (`skills/routeros-network-ops/scripts/`) before any import; lint is not a syntax proof, still dry-run on device.
 
 ## Skills
 

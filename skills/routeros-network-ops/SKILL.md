@@ -10,6 +10,7 @@ Leading rule: never strand management access.
 ## Before touching a live RouterOS device
 
 - Inventory before design: model, RouterOS version, license level, installed packages, CPU/RAM/flash, port count/PoE budget, and wireless support. Read these from the device; don't assume a feature exists because another model has it. Design within those limits or say what won't fit. Persist the inventory facts to project memory so the next session skips re-reading unless the device changed.
+- Record how you connect before the first change: one file per device at `.pulse/memory/devices/<name>.md` (gitignored with `.pulse/`). Store host/IP, transport (`ssh`/`scp`/`sftp`/`telnet`/REST/WinBox/serial), port, user, key path, and credential *reference* (env var name or secrets-file path, mode `0600`). Never write a raw password, token, or key into any memory file. Reuse the recorded method on every later session — don't guess. Missing fields → ask. Method changes → update the file and `verified:` date.
 - Export and backup first (`/export file=...` for diffs/restore-by-readable-config, `/system backup save` for secret-bearing restore). Note interfaces in use and current default route/DNS.
 - Confirm you have a second path back: another interface, serial/console, or a recorded backup you can restore.
 - End every response that makes/applies a live RouterOS change with a paste-ready revert script: the exact commands (or the exact restore command for the recorded backup) to undo what the response just changed. If a change cannot be represented as a script, say why and give the safest equivalent (backup restore, reset, reflash). Never emit an apply-script without the revert block.
@@ -68,6 +69,10 @@ After the user explicitly confirms the config is stable:
 /system scheduler remove [find name="pulse-rollback-<id>"]
 /system script remove [find name="pulse-rollback-<id>"]
 ```
+
+## .rsc lint
+
+Run the bundled linter before importing any `.rsc`: `python3 scripts/lint_rsc.py <file.rsc>` (exit 1 = fix and re-lint; `--strict` also fails on warnings). It checks idempotency guards, `:onerror`/`on-error=` wrappers, and unsafe patterns. Not a syntax proof — still dry-run import on the device (`import test.rsc verbose=yes dry-run`, RouterOS ≥ 7.16) before a real import.
 
 ## If the user asks to "just apply it"
 
