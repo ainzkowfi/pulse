@@ -56,7 +56,7 @@ On any machine, open a session and paste (replace `<repo-url>` with the git URL)
 > 5. Install required plugins only where missing; never overwrite an existing file:
 >    - Symlink `~/pulse/plugins/casually.ts` into `~/.config/opencode/plugins/`.
 >    - Symlink `~/pulse/config/casually.json`, `dcp.jsonc` into `~/.config/opencode/` if absent.
->    - `opencode plugin add @dietrichgebert/ponytail` and `opencode plugin add @tarquinen/opencode-dcp@latest` (skip if already in `opencode.json`)
+>    - `opencode plugin add @dietrichgebert/ponytail@5.3.3` and `opencode plugin add @tarquinen/opencode-dcp@3.2.0` (skip if already pinned in `opencode.json`)
 > 6. Install required skills only if absent from both `~/.config/opencode/skills` and `~/.agents/skills`:
 >    - `npx skills add vercel-labs/skills@find-skills -g -y`
 >    - `npx skills add affaan-m/ecc@verification-loop -g -y`
@@ -94,8 +94,8 @@ ln -s ~/pulse/agent/reviewer.md ~/.config/opencode/agents/reviewer.md
 [ -e ~/.config/opencode/plugins/casually.ts ] || ln -s ~/pulse/plugins/casually.ts ~/.config/opencode/plugins/casually.ts
 [ -e ~/.config/opencode/casually.json ] || ln -s ~/pulse/config/casually.json ~/.config/opencode/casually.json
 [ -e ~/.config/opencode/dcp.jsonc ] || ln -s ~/pulse/config/dcp.jsonc ~/.config/opencode/dcp.jsonc
-opencode plugin add @dietrichgebert/ponytail
-opencode plugin add @tarquinen/opencode-dcp@latest
+opencode plugin add @dietrichgebert/ponytail@5.3.3
+opencode plugin add @tarquinen/opencode-dcp@3.2.0
 # RouterOS docs MCP (rosetta) — ~400MB DB; merge the config entry from the section below
 curl -fsSL https://bun.sh/install | bash
 "$HOME/.bun/bin/bunx" @tikoci/rosetta --setup
@@ -163,7 +163,7 @@ Symlinked machines live immediately. Else re-copy `pulse.md`, `reviewer.md`, plu
 ## Verify
 
 ```sh
-opencode plugin list                         # ponytail, casually, opencode-dcp
+opencode plugin list                         # ponytail 5.3.3, casually, opencode-dcp 3.2.0
 opencode mcp list                            # rosetta connected (chrome-devtools/firecrawl only if configured)
 opencode api get /api/skill --param 'location[directory]=$PWD'
 opencode api get /api/agent                  # should list pulse

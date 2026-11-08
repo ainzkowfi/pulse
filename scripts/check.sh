@@ -51,6 +51,15 @@ NODE
 
 node --experimental-strip-types scripts/check-plugins.mjs
 
+# Pinned third-party plugins must load at the pinned version — a silent
+# failure shows up as a missing row here (set SKIP_PLUGIN_CHECK=1 to skip).
+if [ -z "${SKIP_PLUGIN_CHECK:-}" ]; then
+  PLUGINS="$(opencode plugin list 2>/dev/null)"
+  echo "$PLUGINS" | grep -q "ponytail.*@dietrichgebert/ponytail@5.3.3" || { echo "ponytail @5.3.3 not loaded (plugin list: $PLUGINS)" >&2; exit 1; }
+  echo "$PLUGINS" | grep -q "opencode-dcp.*@tarquinen/opencode-dcp@3.2.0" || { echo "opencode-dcp @3.2.0 not loaded" >&2; exit 1; }
+  echo "plugin load ok"
+fi
+
 # Linter fixtures: danger cases must fail, benign cases must pass.
 set +e
 python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/bulk-remove.rsc" >/dev/null
