@@ -32,6 +32,38 @@ for (const name of fs.readdirSync(path.join(root, 'config'))) {
   if (name.endsWith('.json')) JSON.parse(fs.readFileSync(path.join(root, 'config', name), 'utf8'));
 }
 
+// Permission-glob fixture: approximates OpenCode glob matching so a dead
+// pattern (e.g. a literal "/" in one resource string) gets caught.
+function globMatch(cmd, pattern) {
+  const rx = new RegExp('^' + pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
+  return rx.test(cmd);
+}
+const permBlock = pulse.match(/^---\n([\s\S]*?)\n---/)[1];
+const shells = [...permBlock.matchAll(/action: shell\s*\n\s*resource: "([^"]+)"\s*\n\s*effect: ask/g)].map(m => m[1]);
+const gated = [
+  ['http GET r1/rest/ip/address', 'http *'],
+  ['https r1/rest/ip', 'https *'],
+  ['curl https://r1/rest', 'curl */rest'],
+  ['curl https://r1/rest/ip', 'curl */rest/*'],
+  ['wget https://r1/rest', 'wget *'],
+  ['ftp r1', 'ftp *'],
+  ['ssh chavs@192.168.88.1', 'ssh *'],
+  ['scp file r1:/', 'scp *'],
+  ['sftp r1', 'sftp *'],
+  ['telnet r1', 'telnet *'],
+  ['npm publish', 'npm publish'],
+  ['git push', 'git push'],
+  ['git restore file', 'git restore *'],
+];
+for (const [cmd, want] of gated) {
+  if (!shells.some(p => globMatch(cmd, p))) throw new Error(`perm fixture: "${cmd}" matched no ask rule`);
+  if (!globMatch(cmd, want) && !shells.includes(want)) throw new Error(`perm fixture: rule "${want}" lost from pulse.md`);
+}
+for (const bad of ['http */https *']) {
+  if (shells.includes(bad)) throw new Error(`perm fixture: dead pattern still present: ${bad}`);
+}
+console.log('perm globs ok');
+
 console.log('check ok');
 NODE
 
