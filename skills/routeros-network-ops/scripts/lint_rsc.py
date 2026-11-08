@@ -175,9 +175,9 @@ LOCKOUT_WARN_PATTERNS: list[tuple[str, re.Pattern[str], str]] = [
     ),
 ]
 
-# Generic fallback: any `remove`/`disable` on `[find]` with no `where`, in any
+# Generic fallback: any `remove`/`disable`/`set` on `[find]` with no `where`, in any
 # menu. The named menus above stay errors; everything else warns.
-GENERIC_BULK_RE = re.compile(r"(?:^|\s)(?:remove|disable)\s*\[\s*find\s*\]", re.IGNORECASE)
+GENERIC_BULK_RE = re.compile(r"(?:^|\s)(?:remove|disable|set)\s*\[\s*find\s*\]", re.IGNORECASE)
 
 # Menus where `add` should be preceded by a `:if ([:len [... find where ...]] = 0)` guard.
 IDEMPOTENT_MENUS: dict[str, re.Pattern[str]] = {
@@ -496,7 +496,7 @@ def lint_text(text: str) -> list[Finding]:
                     lineno,
                     WARNING,
                     "dangerous/unconditional-bulk",
-                    "`remove`/`disable` on `[find]` with no `where` filter affects every entry in the menu.",
+                    "`remove`/`disable`/`set` on `[find]` with no `where` filter affects every entry in the menu.",
                     stripped,
                 )
             )
@@ -510,7 +510,7 @@ def lint_text(text: str) -> list[Finding]:
         # loops (balanced braces) never look ahead; multi-line loops track
         # brace depth so an inner `}` doesn't stop the scan early.
         fmatch = FOREACH_FIND_RE.search(stripped)
-        start_code = _strip_strings(stripped)
+        start_code = _strip_code(stripped)
         depth = start_code.count("{") - start_code.count("}")
         body_with_remove = bool(fmatch and re.search(r"\bremove\s", _strip_code(stripped), re.IGNORECASE))
         if fmatch and not body_with_remove and depth > 0:
@@ -518,7 +518,7 @@ def lint_text(text: str) -> list[Finding]:
                 if re.search(r"\bremove\s", _strip_code(ahead), re.IGNORECASE):
                     body_with_remove = True
                     break
-                ahead_code = _strip_strings(ahead)
+                ahead_code = _strip_code(ahead)
                 depth += ahead_code.count("{") - ahead_code.count("}")
                 if depth <= 0:
                     break
