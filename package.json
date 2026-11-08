@@ -10,9 +10,7 @@
   "files": [
     "agent/pulse.md",
     "agent/reviewer.md",
-    "plugins/ponytail.ts",
     "plugins/casually.ts",
-    "config/ponytail.json",
     "config/casually.json",
     "config/dcp.jsonc",
     "memory/",

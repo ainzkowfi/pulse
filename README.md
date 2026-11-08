@@ -35,10 +35,8 @@ What it is not:
 agent/pulse.md                  the agent (V2 file agent)
 agent/reviewer.md               read-only reviewer subagent (visible to main agent)
 skills/routeros-network-ops/    RouterOS/hotspot/ESP safety skill (bundled)
-plugins/ponytail.ts             ponytail mode plugin (V2 port)
 plugins/casually.ts             original always-on dry-sarcastic ultra plugin
 config/dcp.jsonc                dynamic context pruning (DCP plugin) config
-config/ponytail.json            ponytail defaults (full)
 config/casually.json            casually config (always ultra)
 memory/MEMORY.global.template.md   seed for global user memory
 memory/MEMORY.project.template.md  seed for per-project memory
@@ -56,9 +54,9 @@ On any machine, open a session and paste (replace `<repo-url>` with the git URL)
 > 3. Symlink `~/pulse/agent/pulse.md` → `~/.config/opencode/agents/pulse.md` and `~/pulse/agent/reviewer.md` → `~/.config/opencode/agents/reviewer.md` (if symlinks aren't supported, e.g. plain Windows, use `cp` instead and re-copy after every pull).
 > 4. Install the bundled skill only if absent: `mkdir -p ~/.config/opencode/skills && ln -s ~/pulse/skills/routeros-network-ops ~/.config/opencode/skills/routeros-network-ops`.
 > 5. Install required plugins only where missing; never overwrite an existing file:
->    - Symlink `~/pulse/plugins/ponytail.ts` and `~/pulse/plugins/casually.ts` into `~/.config/opencode/plugins/`.
->    - Symlink `~/pulse/config/ponytail.json`, `casually.json`, `dcp.jsonc` into `~/.config/opencode/` if absent.
->    - `opencode plugin add @tarquinen/opencode-dcp@latest` (skip if already in `opencode.json`)
+>    - Symlink `~/pulse/plugins/casually.ts` into `~/.config/opencode/plugins/`.
+>    - Symlink `~/pulse/config/casually.json`, `dcp.jsonc` into `~/.config/opencode/` if absent.
+>    - `opencode plugin add @dietrichgebert/ponytail` and `opencode plugin add @tarquinen/opencode-dcp@latest` (skip if already in `opencode.json`)
 > 6. Install required skills only if absent from both `~/.config/opencode/skills` and `~/.agents/skills`:
 >    - `npx skills add vercel-labs/skills@find-skills -g -y`
 >    - `npx skills add affaan-m/ecc@verification-loop -g -y`
@@ -93,11 +91,10 @@ ln -s ~/pulse/agent/pulse.md ~/.config/opencode/agents/pulse.md
 ln -s ~/pulse/agent/reviewer.md ~/.config/opencode/agents/reviewer.md
 [ -e ~/.config/opencode/skills/routeros-network-ops ] || ln -s ~/pulse/skills/routeros-network-ops ~/.config/opencode/skills/routeros-network-ops
 # plugins/configs: only if absent
-[ -e ~/.config/opencode/plugins/ponytail.ts ] || ln -s ~/pulse/plugins/ponytail.ts ~/.config/opencode/plugins/ponytail.ts
 [ -e ~/.config/opencode/plugins/casually.ts ] || ln -s ~/pulse/plugins/casually.ts ~/.config/opencode/plugins/casually.ts
-[ -e ~/.config/opencode/ponytail.json ] || ln -s ~/pulse/config/ponytail.json ~/.config/opencode/ponytail.json
 [ -e ~/.config/opencode/casually.json ] || ln -s ~/pulse/config/casually.json ~/.config/opencode/casually.json
 [ -e ~/.config/opencode/dcp.jsonc ] || ln -s ~/pulse/config/dcp.jsonc ~/.config/opencode/dcp.jsonc
+opencode plugin add @dietrichgebert/ponytail
 opencode plugin add @tarquinen/opencode-dcp@latest
 # RouterOS docs MCP (rosetta) — ~400MB DB; merge the config entry from the section below
 curl -fsSL https://bun.sh/install | bash
