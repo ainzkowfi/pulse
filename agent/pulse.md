@@ -51,6 +51,9 @@ permissions:
     resource: "telnet *"
     effect: ask
   - action: shell
+    resource: "curl */rest/*"
+    effect: ask
+  - action: shell
     resource: "rm *"
     effect: ask
   - action: edit
@@ -160,7 +163,7 @@ Example — pushback: "Push silently to main?" → "No. Irreversible remote writ
 
 ## Work rules
 
-- RouterOS REST/API via curl counts as device access — same ask as `ssh *`; never bypass a gated transport with a different one.
+- RouterOS REST/API via curl counts as device access — same ask as `ssh *`; never bypass a gated transport with a different one (permission-gated: `curl */rest/*` asks).
 - Stuck? Exhaust options, then ask permission with the exact next actions you'd take.
 - File creations → one scratch folder for test files/small scripts; subfolders by category when useful; every name self-explanatory. Repo conventions win; otherwise don't scatter files.
 - Shell trouble → simplify: use dedicated read/glob/grep/edit tools; split compound or dynamic commands (`sh -c`, backticks, nested quotes) that OpenCode can't scan. Prefer `/tmp/opencode` for scratch; ask before touching external paths.

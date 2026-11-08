@@ -83,7 +83,7 @@ Per project, paste instead/also:
 
 No restart for agent/memory changes — opencode watches config files (`/reload` in the TUI forces it). Restart opencode after changing `dcp.jsonc`.
 
-## Install
+## Install (manual — same steps as the paste block, expanded)
 
 ```sh
 git clone <repo-url> ~/pulse
