@@ -18,13 +18,13 @@ permissions:
     resource: "git show *"
     effect: allow
   - action: shell
-    resource: "git diff --output*"
+    resource: "git diff *--output*"
     effect: ask
   - action: shell
-    resource: "git log --output*"
+    resource: "git log *--output*"
     effect: ask
   - action: shell
-    resource: "git show --output*"
+    resource: "git show *--output*"
     effect: ask
 ---
 

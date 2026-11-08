@@ -388,13 +388,19 @@ def lint_text(text: str) -> list[Finding]:
             continue
 
         # A menu-only line (`/ip firewall filter`) sets the current menu for
-        # the commands that follow it (standard /export layout).
+        # the commands that follow it (standard /export layout). Destructive
+        # bare commands (`/system package downgrade`) match this shape too —
+        # check them first, never swallow them silently.
         if MENU_ONLY_RE.match(stripped) and stripped.split()[-1].lower() not in _MENU_VERBS:
+            for rule, rx, msg in DESTRUCTIVE_PATTERNS:
+                if rx.search(_norm(stripped)):
+                    findings.append(Finding(lineno, ERROR, rule, msg, stripped))
             current_menu = _normalize_menu(stripped)
             continue
         # Patterns check the normalized form, so menu-relative commands
-        # (`remove [find]` under `/ip firewall filter`) are tested too.
-        effective = _norm(f"/{current_menu} {stripped}" if current_menu and not stripped.startswith("/") else stripped)
+        # (`remove [find]` under `/ip firewall filter`) are tested too. Only
+        # letter-led lines inherit the menu — `:foreach`/`}` lines don't.
+        effective = _norm(f"/{current_menu} {stripped}" if current_menu and stripped[:1].isalpha() else stripped)
 
         # ---- Detect what this line opens (consumed when braces open) ----
         guard_menu = None
@@ -427,9 +433,18 @@ def lint_text(text: str) -> list[Finding]:
             if rx.search(effective):
                 findings.append(Finding(lineno, ERROR, rule, msg, stripped))
 
-        # `:foreach x in=[/<menu> find] do=` with no `where` and a `remove` on the line removes every item.
+        # `:foreach x in=[/<menu> find] do=` with no `where` and a `remove` in the
+        # loop body (same line or a following line) removes every item.
         fmatch = FOREACH_FIND_RE.search(stripped)
-        if fmatch and re.search(r"\bremove\s", stripped, re.IGNORECASE):
+        body_with_remove = bool(fmatch and re.search(r"\bremove\s", stripped, re.IGNORECASE))
+        if fmatch and not body_with_remove:
+            for ahead in lines[lineno : lineno + 10]:
+                if re.search(r"\bremove\s", ahead.strip(), re.IGNORECASE):
+                    body_with_remove = True
+                    break
+                if ahead.strip() == "}":
+                    break
+        if fmatch and body_with_remove:
             findings.append(
                 Finding(
                     lineno,

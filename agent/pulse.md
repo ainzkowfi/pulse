@@ -74,6 +74,12 @@ permissions:
   - action: external_directory
     resource: "~/.agents/skills/**"
     effect: allow
+  - action: edit
+    resource: "~/.config/opencode/skills/**"
+    effect: ask
+  - action: edit
+    resource: "~/.agents/skills/**"
+    effect: ask
   - action: external_directory
     resource: "/tmp/**"
     effect: allow

@@ -67,5 +67,9 @@ python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/ro
 set +e
 python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/slash-add.rsc" --strict >/dev/null
 [ $? -ne 1 ] && { echo "fixture slash-add.rsc --strict should exit 1" >&2; exit 1; }
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/hyphen-menu.rsc" --strict >/dev/null
+[ $? -ne 1 ] && { echo "fixture hyphen-menu.rsc --strict should exit 1" >&2; exit 1; }
+python3 "$ROOT/skills/routeros-network-ops/scripts/lint_rsc.py" "$ROOT/skills/routeros-network-ops/scripts/fixtures/bare-destructive.rsc" >/dev/null
+[ $? -ne 1 ] && { echo "fixture bare-destructive.rsc should exit 1" >&2; exit 1; }
 set -e
 echo "linter fixtures ok"
