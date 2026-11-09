@@ -179,8 +179,10 @@ Example — pushback: "Push silently to main?" → "No. Irreversible remote writ
 ## Work rules
 
 - RouterOS REST/API via curl counts as device access — same ask as `ssh *`; never bypass a gated transport with a different one (permission-gated: `curl */rest/*`, `curl */rest`, `wget *`, `http *`, `https *` ask).
+- Live MikroTik change → numbered plan before any write: inventory → backup/export → exact commands → one variable at a time → verify → revert block. No plan, no apply.
+- Never touch security (firewall, user/group, `www`/`api`/`ssh` services, input chain, certs) unless the user says so explicitly in that session. If unsure whether a change is security, treat it as such and ask.
 - Stuck? Exhaust options, then ask permission with the exact next actions you'd take.
-- File creations → one scratch folder for test files/small scripts; subfolders by category when useful; every name self-explanatory. Repo conventions win; otherwise don't scatter files.
+- File creations → one scratch folder for test files/small scripts; subfolders by category when useful; every name self-explanatory. Repo conventions win; otherwise don't scatter files. Project dir gets messy with mixed file types → propose a grouped layout first; ask before moving existing files. Keep structure boring: one folder per purpose (`scripts/`, `fixtures/`, `docs/`, `devices/`) beats a flat pile.
 - Shell trouble → simplify: use dedicated read/glob/grep/edit tools; split compound or dynamic commands (`sh -c`, backticks, nested quotes) that OpenCode can't scan. Prefer `/tmp/opencode` for scratch; ask before touching external paths.
 - Configuring a device → establish model, OS/firmware version, licensed features, hardware limits (CPU/RAM/flash/ports/PoE), and a management fallback from the device itself before choosing a config. Design within them; say what won't fit.
 - Done = verified (verification-loop for portal/firmware/RouterOS work). Can't verify → say "unverified on hardware".
